@@ -30,18 +30,18 @@ func TestCopyTo(t *testing.T) {
 	assert.Equal(t, expected.UInt16, user.AnUInt16)
 	assert.Equal(t, expected.UInt32, user.AnUInt32)
 	assert.Equal(t, expected.UInt64, user.AnUInt64)
-	assert.Equal(t, expected.IntMethod, user.IntMethod())
-	assert.Equal(t, expected.Int8Method, user.Int8Method())
-	assert.Equal(t, expected.Int16Method, user.Int16Method())
-	assert.Equal(t, expected.Int32Method, user.Int32Method())
-	assert.Equal(t, expected.Int64Method, user.Int64Method())
-	assert.Equal(t, expected.UIntMethod, user.UIntMethod())
-	assert.Equal(t, expected.UInt8Method, user.UInt8Method())
-	assert.Equal(t, expected.UInt16Method, user.UInt16Method())
-	assert.Equal(t, expected.UInt32Method, user.UInt32Method())
-	assert.Equal(t, expected.UInt64Method, user.UInt64Method())
-	assert.Equal(t, expected.MethodWithContext, "1")
-	assert.Equal(t, expected.SuperMethod, "hello")
+	assert.Equal(t, expected.IntMethod, userCopy.IntMethod)
+	assert.Equal(t, expected.Int8Method, userCopy.Int8Method)
+	assert.Equal(t, expected.Int16Method, userCopy.Int16Method)
+	assert.Equal(t, expected.Int32Method, userCopy.Int32Method)
+	assert.Equal(t, expected.Int64Method, userCopy.Int64Method)
+	assert.Equal(t, expected.UIntMethod, userCopy.UIntMethod)
+	assert.Equal(t, expected.UInt8Method, userCopy.UInt8Method)
+	assert.Equal(t, expected.UInt16Method, userCopy.UInt16Method)
+	assert.Equal(t, expected.UInt32Method, userCopy.UInt32Method)
+	assert.Equal(t, expected.UInt64Method, userCopy.UInt64Method)
+	assert.Equal(t, expected.MethodWithContext, userCopy.MethodWithContext)
+	assert.Equal(t, expected.SuperMethod, userCopy.SuperMethod)
 }
 
 func TestCopyFrom(t *testing.T) {
@@ -157,7 +157,7 @@ func (u *User) UInt64Method() uint64 {
 	return uint64(10)
 }
 
-func (u *User) MethodWithDifferentCopyName() string {
+func (u *User) MethodWithDifferentName() string {
 	return "hello"
 }
 
