@@ -42,7 +42,7 @@ type User struct {
     Name   string
 }
 
-func (u *User) MethodThatTakesContext(ctx resources.Context) string {
+func (u *User) MethodThatTakesContext(ctx map[string]interface{}) string {
     // do whatever you want
     return ""
 }
