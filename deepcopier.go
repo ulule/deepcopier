@@ -14,9 +14,6 @@ const (
 	// TagName is struct field tag name.
 	TagName = "deepcopier"
 
-	// URIMethodName is the resource URI method name.
-	URIMethodName = "ResourceURI"
-
 	// FieldOptionName is the from field option name for struct tag.
 	FieldOptionName = "field"
 
