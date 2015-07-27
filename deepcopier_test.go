@@ -180,16 +180,16 @@ type UserCopy struct {
 	UInt16            uint16    `json:"an_uint16" deepcopier:"field:AnUInt16"`
 	UInt32            uint32    `json:"an_uint32" deepcopier:"field:AnUInt32"`
 	UInt64            uint64    `json:"an_uint64" deepcopier:"field:AnUInt64"`
-	IntMethod         int       `json:"int_method" deepcopier:"field:IntMethod"`
-	Int8Method        int8      `json:"int8_method" deepcopier:"field:Int8Method"`
-	Int16Method       int16     `json:"int16_method" deepcopier:"field:Int16Method"`
-	Int32Method       int32     `json:"int32_method" deepcopier:"field:Int32Method"`
-	Int64Method       int64     `json:"int64_method" deepcopier:"field:Int64Method"`
-	UIntMethod        uint      `json:"uint_method" deepcopier:"field:UIntMethod"`
-	UInt8Method       uint8     `json:"uint8_method" deepcopier:"field:UInt8Method"`
-	UInt16Method      uint16    `json:"uint16_method" deepcopier:"field:UInt16Method"`
-	UInt32Method      uint32    `json:"uint32_method" deepcopier:"field:UInt32Method"`
-	UInt64Method      uint64    `json:"uint64_method" deepcopier:"field:UInt64Method"`
+	IntMethod         int       `json:"int_method"`
+	Int8Method        int8      `json:"int8_method"`
+	Int16Method       int16     `json:"int16_method"`
+	Int32Method       int32     `json:"int32_method"`
+	Int64Method       int64     `json:"int64_method"`
+	UIntMethod        uint      `json:"uint_method"`
+	UInt8Method       uint8     `json:"uint8_method"`
+	UInt16Method      uint16    `json:"uint16_method"`
+	UInt32Method      uint32    `json:"uint32_method"`
+	UInt64Method      uint64    `json:"uint64_method"`
 	MethodWithContext string    `json:"method_with_context" deepcopier:"context"`
 	SuperMethod       string    `json:"super_method" deepcopier:"field:MethodWithDifferentName"`
 }
