@@ -16,7 +16,7 @@ Copy(instance1).To(instance2)
 
 // Deep copy instance1 into instance2 and passes the following context (which
 // is basically a map[string]interface{}) as first argument
-// to methods of instance2.
+// to methods of instance2 that defined the struct tag "context".
 Copy(instance1).WithContext(map[string]interface{}{"foo": "bar"}).To(instance2)
 
 // Deep copy instance2 into instance1
@@ -24,15 +24,15 @@ Copy(instance1).From(instance2)
 
 // Deep copy instance2 into instance1 and passes the following context (which
 // is basically a map[string]interface{}) as first argument
-// to methods of instance1.
+// to methods of instance1 that defined the struct tag "context".
 Copy(instance1).WithContext(map[string]interface{}{"foo": "bar"}).From(instance2)
 ```
 
-The following struct tags are available:
+You should use the following struct tags:
 
 * `field`: name of the field in the target instance
-* `context`: auto-injects context as first argument to the given method
-* `skip`: just skip this field (does not copy / do anything)
+* `context`: method takes context (map[string]interface{}) as first argument
+* `skip`: just skip this field (does not process anything)
 
 Example:
 
