@@ -244,6 +244,31 @@ func (dc *DeepCopier) SetFieldValue(entity interface{}, name string, value refle
 			return err
 		}
 		return nil
+	case reflect.Uint8:
+		if err := reflections.SetField(entity, name, uint8(value.Uint())); err != nil {
+			return err
+		}
+		return nil
+	case reflect.Uint16:
+		if err := reflections.SetField(entity, name, uint16(value.Uint())); err != nil {
+			return err
+		}
+		return nil
+	case reflect.Uint32:
+		if err := reflections.SetField(entity, name, uint32(value.Uint())); err != nil {
+			return err
+		}
+		return nil
+	case reflect.Uint64:
+		if err := reflections.SetField(entity, name, value.Uint()); err != nil {
+			return err
+		}
+		return nil
+	case reflect.Uint:
+		if err := reflections.SetField(entity, name, uint(value.Uint())); err != nil {
+			return err
+		}
+		return nil
 	case reflect.Float32:
 		if err := reflections.SetField(entity, name, float32(value.Float())); err != nil {
 			return err
