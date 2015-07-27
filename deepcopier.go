@@ -150,10 +150,6 @@ func (dc *DeepCopier) SetField(options *FieldOptions) error {
 	if dc.Reversed {
 		has, _ := reflections.HasField(dc.Destination, options.SourceField)
 		if !has {
-			err := dc.HandleMethod(options)
-			if err != nil {
-				return nil
-			}
 			return nil
 		}
 	}
