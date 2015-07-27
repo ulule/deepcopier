@@ -7,15 +7,13 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-var context = map[string]interface{}{"version": "1"}
-
 func TestCopyTo(t *testing.T) {
 	now := time.Now()
 	user := NewUser(now)
 	userCopy := &UserCopy{}
 	expected := NewUserCopy(now)
 
-	err := Copy(user).WithContext(context).To(userCopy)
+	err := Copy(user).WithContext(map[string]interface{}{"version": "1"}).To(userCopy)
 	assert.Nil(t, err)
 
 	assert.Equal(t, expected.Title, user.Name)
