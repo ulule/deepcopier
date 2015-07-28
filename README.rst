@@ -65,4 +65,10 @@ Example:
         MethodThatTakesContext string `deepcopier:"context"`
     }
 
-    Copy(&User).To(&UserResource)
+    user := &User{
+        Name: "gilles",
+    }
+
+    resource := &UserResource{}
+
+    Copy(user).To(resource)
