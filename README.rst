@@ -5,9 +5,7 @@ Deepcopier
     :alt: Build Status
     :target: http://travis-ci.org/ulule/deepcopier
 
-This package is meant to make copying a bit more easy.
-
-It will allow you to copy a struct from another one and also copy a struct to another one.
+This package is meant to make copying of structs to/from others structs a bit more easy.
 
 
 Installation
@@ -20,6 +18,8 @@ Installation
 This package requires some dependencies:
 
 * `oleiade/reflections <https://github.com/oleiade/reflections>`_: An awesome high level abstractions over reflect library
+
+All dependencies will me installed for you.
 
 Usage
 -----
