@@ -5,7 +5,7 @@ Deepcopier
     :alt: Build Status
     :target: http://travis-ci.org/ulule/deepcopier
 
-This package is meant to make copying of structs to/from others structs a bit more easy.
+This package is meant to make copying of structs to/from others structs a bit easier.
 
 
 Installation
