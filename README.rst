@@ -44,9 +44,9 @@ Usage
 
 You should use the following struct tags:
 
-* `field`: name of the field in the target instance
-* `context`: method takes context (map[string]interface{}) as first argument
-* `skip`: just skip this field (does not process anything)
+* **field**: name of the field in the target instance
+* **context**: method will take context (map[string]interface{}) as first argument
+* **skip**: skip this field (do not process anything)
 
 Example:
 
