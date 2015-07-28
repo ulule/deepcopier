@@ -1,5 +1,7 @@
 # Deepcopier
 
+[![Build Status](https://travis-ci.org/ulule/deepcopier.svg?branch=master)](https://travis-ci.org/ulule/deepcopier)
+
 *Copy your struct like a boss.*
 
 ## Installation
