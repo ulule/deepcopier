@@ -19,7 +19,7 @@ This package requires some dependencies:
 
 * `oleiade/reflections <https://github.com/oleiade/reflections>`_: An awesome high level abstractions over reflect library
 
-All dependencies will me installed for you.
+All dependencies will be installed for you.
 
 Usage
 -----
