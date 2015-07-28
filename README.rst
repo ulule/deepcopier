@@ -48,9 +48,16 @@ Example:
 
 .. code-block:: go
 
+    package main
+
+    import (
+        "fmt"
+        "github.com/ulule/deepcopier"
+    )
+
     // Model
     type User struct {
-        Name   string
+        Name string
     }
 
     func (u *User) MethodThatTakesContext(ctx map[string]interface{}) string {
@@ -65,10 +72,14 @@ Example:
         MethodThatTakesContext string `deepcopier:"context"`
     }
 
-    user := &User{
-        Name: "gilles",
+    func main() {
+        user := &User{
+            Name: "gilles",
+        }
+
+        resource := &UserResource{}
+
+        deepcopier.Copy(user).To(resource)
+
+        fmt.Println(resource.DisplayName)
     }
-
-    resource := &UserResource{}
-
-    Copy(user).To(resource)
