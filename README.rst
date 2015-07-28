@@ -17,6 +17,10 @@ Installation
 
     $ go get github.com/ulule/deepcopier
 
+This package requires some dependencies:
+
+* `oleiade/reflections <https://github.com/oleiade/reflections>`_: An awesome high level abstractions over reflect library
+
 Usage
 -----
 
