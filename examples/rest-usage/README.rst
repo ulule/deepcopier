@@ -38,6 +38,7 @@ already have postgresql_ installed on your laptop :)
 Let's create the databass!
 
 ::
+
     $ psql postgres
     psql (9.4.1)
     Type "help" for help.
