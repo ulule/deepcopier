@@ -5,7 +5,7 @@ Context
 -------
 
 We are currently refactoring our API_ at Ulule from our monolithic Python
-stack from `django-tastypie`_ to a separate Go microservice_.
+stack with `django-tastypie`_ to a separate Go microservice_.
 
 When working with models in Go, you don't want to expose all columns and
 also implement more methods without writing a lot of code, because everyone
