@@ -21,8 +21,8 @@ This package requires some dependencies:
 
 All dependencies will be installed for you.
 
-Usage
------
+Basic usage
+-----------
 
 .. code-block:: go
 
@@ -87,3 +87,17 @@ Example:
 
         fmt.Println(resource.DisplayName)
     }
+
+Looking for more information about the usage?
+
+We wrote `an introduction article <https://github.com/ulule/deepcopier/blob/master/examples/rest-usage/README.rst>`_,
+have a look and give us your feedback.
+
+Contributing
+------------
+
+* Ping us on twitter `@oibafsellig <https://twitter.com/oibafsellig>`_, `@thoas <https://twitter.com/thoas>`_
+* Fork the `project <https://github.com/ulule/deepcopier>`_
+* Fix `bugs <https://github.com/ulule/deepcopier/issues>`_
+
+Don't hesitate ;)
