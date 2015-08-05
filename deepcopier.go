@@ -207,6 +207,14 @@ func (dc *DeepCopier) SetFieldValue(entity interface{}, name string, value refle
 		}
 	}
 
+	// Slices
+	if kind == reflect.Slice {
+		if err := reflections.SetField(entity, name, value.Interface()); err != nil {
+			return err
+		}
+		return nil
+	}
+
 	// Reflect
 	switch kind {
 	case reflect.Int8:
