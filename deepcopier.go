@@ -148,7 +148,7 @@ func (dc *DeepCopier) SetField(options *FieldOptions) error {
 	}
 
 	if dc.Reversed {
-		has, _ := reflections.HasField(dc.Destination, options.SourceField)
+		has, _ := reflections.HasField(dc.Destination, options.DestinationField)
 		if !has {
 			return nil
 		}
@@ -209,10 +209,13 @@ func (dc *DeepCopier) SetFieldValue(entity interface{}, name string, value refle
 
 	// Slices
 	if kind == reflect.Slice {
-		if err := reflections.SetField(entity, name, value.Interface()); err != nil {
-			return err
+		switch v := value.Interface().(type) {
+		case []int8, []int16, []int32, []int64, []int, []uint8, []uint16, []uint32, []uint64, []uint, []float32, []float64, []string, []bool:
+			if err := reflections.SetField(entity, name, v); err != nil {
+				return err
+			}
+			return nil
 		}
-		return nil
 	}
 
 	// Reflect
