@@ -69,6 +69,23 @@ func TestCopyFrom(t *testing.T) {
 	assert.Equal(t, expected.AnUInt64, userCopy.UInt64)
 }
 
+func TestSlices(t *testing.T) {
+	user := &User{
+		StringSlice: []string{"Chuck", "Norris"},
+		IntSlice:    []int{0, 8, 15},
+	}
+
+	userTo := &User{}
+	err := Copy(user).To(userTo)
+	if assert.NoError(t, err) {
+		assert.Equal(t, user.StringSlice, userTo.StringSlice)
+		assert.Equal(t, user.IntSlice, userTo.IntSlice)
+
+		user.StringSlice = []string{"hello", "world"}
+		assert.NotEqual(t, user.StringSlice, userTo.StringSlice)
+	}
+}
+
 // -----------------------------------------------------------------------------
 // Fixtures
 // -----------------------------------------------------------------------------
@@ -88,6 +105,9 @@ type User struct {
 	AnUInt16 uint16
 	AnUInt32 uint32
 	AnUInt64 uint64
+
+	StringSlice []string
+	IntSlice    []int
 }
 
 func NewUser(now time.Time) *User {
