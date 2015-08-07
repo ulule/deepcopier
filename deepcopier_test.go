@@ -11,37 +11,41 @@ func TestCopyTo(t *testing.T) {
 	now := time.Now()
 	user := NewUser(now)
 	userCopy := &UserCopy{}
-	expected := NewUserCopy(now)
+	expectedCopy := NewUserCopy(now)
 
 	err := Copy(user).WithContext(map[string]interface{}{"version": "1"}).To(userCopy)
 	assert.Nil(t, err)
 
-	assert.Equal(t, expected.Title, user.Name)
-	assert.Equal(t, expected.Date, user.Date)
-	assert.Equal(t, expected.Float32, user.AFloat32)
-	assert.Equal(t, expected.Float64, user.AFloat64)
-	assert.Equal(t, expected.Int, user.AnInt)
-	assert.Equal(t, expected.Int8, user.AnInt8)
-	assert.Equal(t, expected.Int16, user.AnInt16)
-	assert.Equal(t, expected.Int32, user.AnInt32)
-	assert.Equal(t, expected.Int64, user.AnInt64)
-	assert.Equal(t, expected.UInt, user.AnUInt)
-	assert.Equal(t, expected.UInt8, user.AnUInt8)
-	assert.Equal(t, expected.UInt16, user.AnUInt16)
-	assert.Equal(t, expected.UInt32, user.AnUInt32)
-	assert.Equal(t, expected.UInt64, user.AnUInt64)
-	assert.Equal(t, expected.IntMethod, userCopy.IntMethod)
-	assert.Equal(t, expected.Int8Method, userCopy.Int8Method)
-	assert.Equal(t, expected.Int16Method, userCopy.Int16Method)
-	assert.Equal(t, expected.Int32Method, userCopy.Int32Method)
-	assert.Equal(t, expected.Int64Method, userCopy.Int64Method)
-	assert.Equal(t, expected.UIntMethod, userCopy.UIntMethod)
-	assert.Equal(t, expected.UInt8Method, userCopy.UInt8Method)
-	assert.Equal(t, expected.UInt16Method, userCopy.UInt16Method)
-	assert.Equal(t, expected.UInt32Method, userCopy.UInt32Method)
-	assert.Equal(t, expected.UInt64Method, userCopy.UInt64Method)
-	assert.Equal(t, expected.MethodWithContext, userCopy.MethodWithContext)
-	assert.Equal(t, expected.SuperMethod, userCopy.SuperMethod)
+	assert.Equal(t, expectedCopy.Title, userCopy.Title)
+	assert.Equal(t, expectedCopy.Date, userCopy.Date)
+	assert.Equal(t, expectedCopy.Float32, userCopy.Float32)
+	assert.Equal(t, expectedCopy.Float64, userCopy.Float64)
+	assert.Equal(t, expectedCopy.Int, userCopy.Int)
+	assert.Equal(t, expectedCopy.Int8, userCopy.Int8)
+	assert.Equal(t, expectedCopy.Int16, userCopy.Int16)
+	assert.Equal(t, expectedCopy.Int32, userCopy.Int32)
+	assert.Equal(t, expectedCopy.Int64, userCopy.Int64)
+	assert.Equal(t, expectedCopy.UInt, userCopy.UInt)
+	assert.Equal(t, expectedCopy.UInt8, userCopy.UInt8)
+	assert.Equal(t, expectedCopy.UInt16, userCopy.UInt16)
+	assert.Equal(t, expectedCopy.UInt32, userCopy.UInt32)
+	assert.Equal(t, expectedCopy.UInt64, userCopy.UInt64)
+	assert.Equal(t, expectedCopy.StringSlice, userCopy.StringSlice)
+	assert.Equal(t, expectedCopy.IntSlice, userCopy.IntSlice)
+	assert.Equal(t, expectedCopy.IntMethod, userCopy.IntMethod)
+	assert.Equal(t, expectedCopy.Int8Method, userCopy.Int8Method)
+	assert.Equal(t, expectedCopy.Int16Method, userCopy.Int16Method)
+	assert.Equal(t, expectedCopy.Int32Method, userCopy.Int32Method)
+	assert.Equal(t, expectedCopy.Int64Method, userCopy.Int64Method)
+	assert.Equal(t, expectedCopy.UIntMethod, userCopy.UIntMethod)
+	assert.Equal(t, expectedCopy.UInt8Method, userCopy.UInt8Method)
+	assert.Equal(t, expectedCopy.UInt16Method, userCopy.UInt16Method)
+	assert.Equal(t, expectedCopy.UInt32Method, userCopy.UInt32Method)
+	assert.Equal(t, expectedCopy.UInt64Method, userCopy.UInt64Method)
+	assert.Equal(t, expectedCopy.MethodWithContext, userCopy.MethodWithContext)
+	assert.Equal(t, expectedCopy.SuperMethod, userCopy.SuperMethod)
+	assert.Equal(t, expectedCopy.StringSlice, userCopy.StringSlice)
+	assert.Equal(t, expectedCopy.IntSlice, userCopy.IntSlice)
 }
 
 func TestCopyFrom(t *testing.T) {
@@ -53,37 +57,22 @@ func TestCopyFrom(t *testing.T) {
 	err := Copy(user).From(userCopy)
 	assert.Nil(t, err)
 
-	assert.Equal(t, expected.Name, userCopy.Title)
-	assert.Equal(t, expected.Date, userCopy.Date)
-	assert.Equal(t, expected.AFloat32, userCopy.Float32)
-	assert.Equal(t, expected.AFloat64, userCopy.Float64)
-	assert.Equal(t, expected.AnInt, userCopy.Int)
-	assert.Equal(t, expected.AnInt8, userCopy.Int8)
-	assert.Equal(t, expected.AnInt16, userCopy.Int16)
-	assert.Equal(t, expected.AnInt32, userCopy.Int32)
-	assert.Equal(t, expected.AnInt64, userCopy.Int64)
-	assert.Equal(t, expected.AnUInt, userCopy.UInt)
-	assert.Equal(t, expected.AnUInt8, userCopy.UInt8)
-	assert.Equal(t, expected.AnUInt16, userCopy.UInt16)
-	assert.Equal(t, expected.AnUInt32, userCopy.UInt32)
-	assert.Equal(t, expected.AnUInt64, userCopy.UInt64)
-}
-
-func TestSlices(t *testing.T) {
-	user := &User{
-		StringSlice: []string{"Chuck", "Norris"},
-		IntSlice:    []int{0, 8, 15},
-	}
-
-	userTo := &User{}
-	err := Copy(user).To(userTo)
-	if assert.NoError(t, err) {
-		assert.Equal(t, user.StringSlice, userTo.StringSlice)
-		assert.Equal(t, user.IntSlice, userTo.IntSlice)
-
-		user.StringSlice = []string{"hello", "world"}
-		assert.NotEqual(t, user.StringSlice, userTo.StringSlice)
-	}
+	assert.Equal(t, expected.Name, user.Name)
+	assert.Equal(t, expected.Date, user.Date)
+	assert.Equal(t, expected.AFloat32, user.AFloat32)
+	assert.Equal(t, expected.AFloat64, user.AFloat64)
+	assert.Equal(t, expected.AnInt, user.AnInt)
+	assert.Equal(t, expected.AnInt8, user.AnInt8)
+	assert.Equal(t, expected.AnInt16, user.AnInt16)
+	assert.Equal(t, expected.AnInt32, user.AnInt32)
+	assert.Equal(t, expected.AnInt64, user.AnInt64)
+	assert.Equal(t, expected.AnUInt, user.AnUInt)
+	assert.Equal(t, expected.AnUInt8, user.AnUInt8)
+	assert.Equal(t, expected.AnUInt16, user.AnUInt16)
+	assert.Equal(t, expected.AnUInt32, user.AnUInt32)
+	assert.Equal(t, expected.AnUInt64, user.AnUInt64)
+	assert.Equal(t, expected.AStringSlice, user.AStringSlice)
+	assert.Equal(t, expected.AnIntSlice, user.AnIntSlice)
 }
 
 // -----------------------------------------------------------------------------
@@ -91,41 +80,42 @@ func TestSlices(t *testing.T) {
 // -----------------------------------------------------------------------------
 
 type User struct {
-	Name     string
-	Date     time.Time
-	AFloat32 float32
-	AFloat64 float64
-	AnInt    int
-	AnInt8   int8
-	AnInt16  int16
-	AnInt32  int32
-	AnInt64  int64
-	AnUInt   uint
-	AnUInt8  uint8
-	AnUInt16 uint16
-	AnUInt32 uint32
-	AnUInt64 uint64
-
-	StringSlice []string
-	IntSlice    []int
+	Name         string
+	Date         time.Time
+	AFloat32     float32
+	AFloat64     float64
+	AnInt        int
+	AnInt8       int8
+	AnInt16      int16
+	AnInt32      int32
+	AnInt64      int64
+	AnUInt       uint
+	AnUInt8      uint8
+	AnUInt16     uint16
+	AnUInt32     uint32
+	AnUInt64     uint64
+	AStringSlice []string
+	AnIntSlice   []int
 }
 
 func NewUser(now time.Time) *User {
 	return &User{
-		Name:     "Chuck Norris",
-		Date:     now,
-		AFloat32: float32(10.0),
-		AFloat64: float64(10.0),
-		AnInt:    int(10),
-		AnInt8:   int8(10),
-		AnInt16:  int16(10),
-		AnInt32:  int32(10),
-		AnInt64:  int64(10),
-		AnUInt:   uint(10),
-		AnUInt8:  uint8(10),
-		AnUInt16: uint16(10),
-		AnUInt32: uint32(10),
-		AnUInt64: uint64(10),
+		Name:         "Chuck Norris",
+		Date:         now,
+		AFloat32:     float32(10.0),
+		AFloat64:     float64(10.0),
+		AnInt:        int(10),
+		AnInt8:       int8(10),
+		AnInt16:      int16(10),
+		AnInt32:      int32(10),
+		AnInt64:      int64(10),
+		AnUInt:       uint(10),
+		AnUInt8:      uint8(10),
+		AnUInt16:     uint16(10),
+		AnUInt32:     uint32(10),
+		AnUInt64:     uint64(10),
+		AStringSlice: []string{"Chuck", "Norris"},
+		AnIntSlice:   []int{0, 8, 15},
 	}
 }
 
@@ -200,6 +190,8 @@ type UserCopy struct {
 	UInt16            uint16    `json:"an_uint16" deepcopier:"field:AnUInt16"`
 	UInt32            uint32    `json:"an_uint32" deepcopier:"field:AnUInt32"`
 	UInt64            uint64    `json:"an_uint64" deepcopier:"field:AnUInt64"`
+	StringSlice       []string  `json:"a_string_slice" deepcopier:"field:AStringSlice"`
+	IntSlice          []int     `json:"an_int_slice" deepcopier:"field:AnIntSlice"`
 	IntMethod         int       `json:"int_method"`
 	Int8Method        int8      `json:"int8_method"`
 	Int16Method       int16     `json:"int16_method"`
@@ -230,6 +222,8 @@ func NewUserCopy(now time.Time) *UserCopy {
 		UInt16:            uint16(10),
 		UInt32:            uint32(10),
 		UInt64:            uint64(10),
+		StringSlice:       []string{"Chuck", "Norris"},
+		IntSlice:          []int{0, 8, 15},
 		IntMethod:         int(10),
 		Int8Method:        int8(10),
 		Int16Method:       int16(10),
