@@ -4,6 +4,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/guregu/null"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -96,6 +97,7 @@ type User struct {
 	AnUInt64     uint64
 	AStringSlice []string
 	AnIntSlice   []int
+	ANullString  null.String
 }
 
 func NewUser(now time.Time) *User {
@@ -116,6 +118,7 @@ func NewUser(now time.Time) *User {
 		AnUInt64:     uint64(10),
 		AStringSlice: []string{"Chuck", "Norris"},
 		AnIntSlice:   []int{0, 8, 15},
+		ANullString:  null.StringFrom("I'm null"),
 	}
 }
 
@@ -176,34 +179,35 @@ func (u *User) MethodWithContext(context map[string]interface{}) string {
 }
 
 type UserCopy struct {
-	Date              time.Time `json:"date"`
-	Title             string    `json:"name" deepcopier:"field:Name"`
-	Float32           float32   `json:"a_float32" deepcopier:"field:AFloat32"`
-	Float64           float64   `json:"a_float64" deepcopier:"field:AFloat64"`
-	Int               int       `json:"an_int" deepcopier:"field:AnInt"`
-	Int8              int8      `json:"an_int8" deepcopier:"field:AnInt8"`
-	Int16             int16     `json:"an_int16" deepcopier:"field:AnInt16"`
-	Int32             int32     `json:"an_int32" deepcopier:"field:AnInt32"`
-	Int64             int64     `json:"an_int64" deepcopier:"field:AnInt64"`
-	UInt              uint      `json:"an_uint" deepcopier:"field:AnUInt"`
-	UInt8             uint8     `json:"an_uint8" deepcopier:"field:AnUInt8"`
-	UInt16            uint16    `json:"an_uint16" deepcopier:"field:AnUInt16"`
-	UInt32            uint32    `json:"an_uint32" deepcopier:"field:AnUInt32"`
-	UInt64            uint64    `json:"an_uint64" deepcopier:"field:AnUInt64"`
-	StringSlice       []string  `json:"a_string_slice" deepcopier:"field:AStringSlice"`
-	IntSlice          []int     `json:"an_int_slice" deepcopier:"field:AnIntSlice"`
-	IntMethod         int       `json:"int_method"`
-	Int8Method        int8      `json:"int8_method"`
-	Int16Method       int16     `json:"int16_method"`
-	Int32Method       int32     `json:"int32_method"`
-	Int64Method       int64     `json:"int64_method"`
-	UIntMethod        uint      `json:"uint_method"`
-	UInt8Method       uint8     `json:"uint8_method"`
-	UInt16Method      uint16    `json:"uint16_method"`
-	UInt32Method      uint32    `json:"uint32_method"`
-	UInt64Method      uint64    `json:"uint64_method"`
-	MethodWithContext string    `json:"method_with_context" deepcopier:"context"`
-	SuperMethod       string    `json:"super_method" deepcopier:"field:MethodWithDifferentName"`
+	Date              time.Time   `json:"date"`
+	Title             string      `json:"name" deepcopier:"field:Name"`
+	Float32           float32     `json:"a_float32" deepcopier:"field:AFloat32"`
+	Float64           float64     `json:"a_float64" deepcopier:"field:AFloat64"`
+	Int               int         `json:"an_int" deepcopier:"field:AnInt"`
+	Int8              int8        `json:"an_int8" deepcopier:"field:AnInt8"`
+	Int16             int16       `json:"an_int16" deepcopier:"field:AnInt16"`
+	Int32             int32       `json:"an_int32" deepcopier:"field:AnInt32"`
+	Int64             int64       `json:"an_int64" deepcopier:"field:AnInt64"`
+	UInt              uint        `json:"an_uint" deepcopier:"field:AnUInt"`
+	UInt8             uint8       `json:"an_uint8" deepcopier:"field:AnUInt8"`
+	UInt16            uint16      `json:"an_uint16" deepcopier:"field:AnUInt16"`
+	UInt32            uint32      `json:"an_uint32" deepcopier:"field:AnUInt32"`
+	UInt64            uint64      `json:"an_uint64" deepcopier:"field:AnUInt64"`
+	NullString        null.String `json:"a_null_string" deepcopier:"field:ANullString"`
+	StringSlice       []string    `json:"a_string_slice" deepcopier:"field:AStringSlice"`
+	IntSlice          []int       `json:"an_int_slice" deepcopier:"field:AnIntSlice"`
+	IntMethod         int         `json:"int_method"`
+	Int8Method        int8        `json:"int8_method"`
+	Int16Method       int16       `json:"int16_method"`
+	Int32Method       int32       `json:"int32_method"`
+	Int64Method       int64       `json:"int64_method"`
+	UIntMethod        uint        `json:"uint_method"`
+	UInt8Method       uint8       `json:"uint8_method"`
+	UInt16Method      uint16      `json:"uint16_method"`
+	UInt32Method      uint32      `json:"uint32_method"`
+	UInt64Method      uint64      `json:"uint64_method"`
+	MethodWithContext string      `json:"method_with_context" deepcopier:"context"`
+	SuperMethod       string      `json:"super_method" deepcopier:"field:MethodWithDifferentName"`
 }
 
 func NewUserCopy(now time.Time) *UserCopy {
@@ -224,6 +228,7 @@ func NewUserCopy(now time.Time) *UserCopy {
 		UInt64:            uint64(10),
 		StringSlice:       []string{"Chuck", "Norris"},
 		IntSlice:          []int{0, 8, 15},
+		NullString:        null.StringFrom("I'm null"),
 		IntMethod:         int(10),
 		Int8Method:        int8(10),
 		Int16Method:       int16(10),
