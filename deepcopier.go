@@ -200,12 +200,7 @@ func (dc *DeepCopier) SetFieldValue(entity interface{}, name string, value refle
 	// Structs
 	if kind == reflect.Struct {
 		switch v := value.Interface().(type) {
-		case time.Time, pq.NullTime:
-			if err := reflections.SetField(entity, name, v); err != nil {
-				return err
-			}
-			return nil
-		case null.String:
+		case time.Time, pq.NullTime, null.String:
 			if err := reflections.SetField(entity, name, v); err != nil {
 				return err
 			}
