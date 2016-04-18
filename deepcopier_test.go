@@ -92,7 +92,7 @@ func TestCopyFrom(t *testing.T) {
 	user := &User{}
 	userExpected := NewUser(now)
 	userCopy := NewUserCopy(now)
-	// userCopyExtended := NewUserCopyExtended(now)
+	userCopyExtended := NewUserCopyExtended(now)
 
 	is.Nil(Copy(user).From(userCopy))
 
@@ -113,24 +113,24 @@ func TestCopyFrom(t *testing.T) {
 	is.Equal(userExpected.AStringSlice, user.AStringSlice)
 	is.Equal(userExpected.AnIntSlice, user.AnIntSlice)
 
-	// is.Nil(Copy(user).From(userCopyExtended))
-	//
-	// is.Equal(userExpected.Name, user.Name)
-	// is.Equal(userExpected.Date, user.Date)
-	// is.Equal(userExpected.AFloat32, user.AFloat32)
-	// is.Equal(userExpected.AFloat64, user.AFloat64)
-	// is.Equal(userExpected.AnInt, user.AnInt)
-	// is.Equal(userExpected.AnInt8, user.AnInt8)
-	// is.Equal(userExpected.AnInt16, user.AnInt16)
-	// is.Equal(userExpected.AnInt32, user.AnInt32)
-	// is.Equal(userExpected.AnInt64, user.AnInt64)
-	// is.Equal(userExpected.AnUInt, user.AnUInt)
-	// is.Equal(userExpected.AnUInt8, user.AnUInt8)
-	// is.Equal(userExpected.AnUInt16, user.AnUInt16)
-	// is.Equal(userExpected.AnUInt32, user.AnUInt32)
-	// is.Equal(userExpected.AnUInt64, user.AnUInt64)
-	// is.Equal(userExpected.AStringSlice, user.AStringSlice)
-	// is.Equal(userExpected.AnIntSlice, user.AnIntSlice)
+	is.Nil(Copy(user).From(userCopyExtended))
+
+	is.Equal(userExpected.Name, user.Name)
+	is.Equal(userExpected.Date, user.Date)
+	is.Equal(userExpected.AFloat32, user.AFloat32)
+	is.Equal(userExpected.AFloat64, user.AFloat64)
+	is.Equal(userExpected.AnInt, user.AnInt)
+	is.Equal(userExpected.AnInt8, user.AnInt8)
+	is.Equal(userExpected.AnInt16, user.AnInt16)
+	is.Equal(userExpected.AnInt32, user.AnInt32)
+	is.Equal(userExpected.AnInt64, user.AnInt64)
+	is.Equal(userExpected.AnUInt, user.AnUInt)
+	is.Equal(userExpected.AnUInt8, user.AnUInt8)
+	is.Equal(userExpected.AnUInt16, user.AnUInt16)
+	is.Equal(userExpected.AnUInt32, user.AnUInt32)
+	is.Equal(userExpected.AnUInt64, user.AnUInt64)
+	is.Equal(userExpected.AStringSlice, user.AStringSlice)
+	is.Equal(userExpected.AnIntSlice, user.AnIntSlice)
 }
 
 // -----------------------------------------------------------------------------
