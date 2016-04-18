@@ -14,40 +14,75 @@ func TestCopyTo(t *testing.T) {
 
 	user := NewUser(now)
 	userCopy := &UserCopy{}
-	expectedCopy := NewUserCopy(now)
+	userCopyExtended := &UserCopyExtended{}
+	expectedUserCopy := NewUserCopy(now)
+	expectedUserCopyExtended := NewUserCopyExtended(now)
 
 	is.Nil(Copy(user).WithContext(map[string]interface{}{"version": "1"}).To(userCopy))
 
-	is.Equal(expectedCopy.Title, userCopy.Title)
-	is.Equal(expectedCopy.Date, userCopy.Date)
-	is.Equal(expectedCopy.Float32, userCopy.Float32)
-	is.Equal(expectedCopy.Float64, userCopy.Float64)
-	is.Equal(expectedCopy.Int, userCopy.Int)
-	is.Equal(expectedCopy.Int8, userCopy.Int8)
-	is.Equal(expectedCopy.Int16, userCopy.Int16)
-	is.Equal(expectedCopy.Int32, userCopy.Int32)
-	is.Equal(expectedCopy.Int64, userCopy.Int64)
-	is.Equal(expectedCopy.UInt, userCopy.UInt)
-	is.Equal(expectedCopy.UInt8, userCopy.UInt8)
-	is.Equal(expectedCopy.UInt16, userCopy.UInt16)
-	is.Equal(expectedCopy.UInt32, userCopy.UInt32)
-	is.Equal(expectedCopy.UInt64, userCopy.UInt64)
-	is.Equal(expectedCopy.StringSlice, userCopy.StringSlice)
-	is.Equal(expectedCopy.IntSlice, userCopy.IntSlice)
-	is.Equal(expectedCopy.IntMethod, userCopy.IntMethod)
-	is.Equal(expectedCopy.Int8Method, userCopy.Int8Method)
-	is.Equal(expectedCopy.Int16Method, userCopy.Int16Method)
-	is.Equal(expectedCopy.Int32Method, userCopy.Int32Method)
-	is.Equal(expectedCopy.Int64Method, userCopy.Int64Method)
-	is.Equal(expectedCopy.UIntMethod, userCopy.UIntMethod)
-	is.Equal(expectedCopy.UInt8Method, userCopy.UInt8Method)
-	is.Equal(expectedCopy.UInt16Method, userCopy.UInt16Method)
-	is.Equal(expectedCopy.UInt32Method, userCopy.UInt32Method)
-	is.Equal(expectedCopy.UInt64Method, userCopy.UInt64Method)
-	is.Equal(expectedCopy.MethodWithContext, userCopy.MethodWithContext)
-	is.Equal(expectedCopy.SuperMethod, userCopy.SuperMethod)
-	is.Equal(expectedCopy.StringSlice, userCopy.StringSlice)
-	is.Equal(expectedCopy.IntSlice, userCopy.IntSlice)
+	is.Equal(expectedUserCopy.Title, userCopy.Title)
+	is.Equal(expectedUserCopy.Date, userCopy.Date)
+	is.Equal(expectedUserCopy.Float32, userCopy.Float32)
+	is.Equal(expectedUserCopy.Float64, userCopy.Float64)
+	is.Equal(expectedUserCopy.Int, userCopy.Int)
+	is.Equal(expectedUserCopy.Int8, userCopy.Int8)
+	is.Equal(expectedUserCopy.Int16, userCopy.Int16)
+	is.Equal(expectedUserCopy.Int32, userCopy.Int32)
+	is.Equal(expectedUserCopy.Int64, userCopy.Int64)
+	is.Equal(expectedUserCopy.UInt, userCopy.UInt)
+	is.Equal(expectedUserCopy.UInt8, userCopy.UInt8)
+	is.Equal(expectedUserCopy.UInt16, userCopy.UInt16)
+	is.Equal(expectedUserCopy.UInt32, userCopy.UInt32)
+	is.Equal(expectedUserCopy.UInt64, userCopy.UInt64)
+	is.Equal(expectedUserCopy.StringSlice, userCopy.StringSlice)
+	is.Equal(expectedUserCopy.IntSlice, userCopy.IntSlice)
+	is.Equal(expectedUserCopy.IntMethod, userCopy.IntMethod)
+	is.Equal(expectedUserCopy.Int8Method, userCopy.Int8Method)
+	is.Equal(expectedUserCopy.Int16Method, userCopy.Int16Method)
+	is.Equal(expectedUserCopy.Int32Method, userCopy.Int32Method)
+	is.Equal(expectedUserCopy.Int64Method, userCopy.Int64Method)
+	is.Equal(expectedUserCopy.UIntMethod, userCopy.UIntMethod)
+	is.Equal(expectedUserCopy.UInt8Method, userCopy.UInt8Method)
+	is.Equal(expectedUserCopy.UInt16Method, userCopy.UInt16Method)
+	is.Equal(expectedUserCopy.UInt32Method, userCopy.UInt32Method)
+	is.Equal(expectedUserCopy.UInt64Method, userCopy.UInt64Method)
+	is.Equal(expectedUserCopy.MethodWithContext, userCopy.MethodWithContext)
+	is.Equal(expectedUserCopy.SuperMethod, userCopy.SuperMethod)
+	is.Equal(expectedUserCopy.StringSlice, userCopy.StringSlice)
+	is.Equal(expectedUserCopy.IntSlice, userCopy.IntSlice)
+
+	is.Nil(Copy(user).WithContext(map[string]interface{}{"version": "1"}).To(userCopyExtended))
+
+	is.Equal(expectedUserCopyExtended.Title, userCopyExtended.Title)
+	is.Equal(expectedUserCopyExtended.Date, userCopyExtended.Date)
+	is.Equal(expectedUserCopyExtended.Float32, userCopyExtended.Float32)
+	is.Equal(expectedUserCopyExtended.Float64, userCopyExtended.Float64)
+	is.Equal(expectedUserCopyExtended.Int, userCopyExtended.Int)
+	is.Equal(expectedUserCopyExtended.Int8, userCopyExtended.Int8)
+	is.Equal(expectedUserCopyExtended.Int16, userCopyExtended.Int16)
+	is.Equal(expectedUserCopyExtended.Int32, userCopyExtended.Int32)
+	is.Equal(expectedUserCopyExtended.Int64, userCopyExtended.Int64)
+	is.Equal(expectedUserCopyExtended.UInt, userCopyExtended.UInt)
+	is.Equal(expectedUserCopyExtended.UInt8, userCopyExtended.UInt8)
+	is.Equal(expectedUserCopyExtended.UInt16, userCopyExtended.UInt16)
+	is.Equal(expectedUserCopyExtended.UInt32, userCopyExtended.UInt32)
+	is.Equal(expectedUserCopyExtended.UInt64, userCopyExtended.UInt64)
+	is.Equal(expectedUserCopyExtended.StringSlice, userCopyExtended.StringSlice)
+	is.Equal(expectedUserCopyExtended.IntSlice, userCopyExtended.IntSlice)
+	is.Equal(expectedUserCopyExtended.IntMethod, userCopyExtended.IntMethod)
+	is.Equal(expectedUserCopyExtended.Int8Method, userCopyExtended.Int8Method)
+	is.Equal(expectedUserCopyExtended.Int16Method, userCopyExtended.Int16Method)
+	is.Equal(expectedUserCopyExtended.Int32Method, userCopyExtended.Int32Method)
+	is.Equal(expectedUserCopyExtended.Int64Method, userCopyExtended.Int64Method)
+	is.Equal(expectedUserCopyExtended.UIntMethod, userCopyExtended.UIntMethod)
+	is.Equal(expectedUserCopyExtended.UInt8Method, userCopyExtended.UInt8Method)
+	is.Equal(expectedUserCopyExtended.UInt16Method, userCopyExtended.UInt16Method)
+	is.Equal(expectedUserCopyExtended.UInt32Method, userCopyExtended.UInt32Method)
+	is.Equal(expectedUserCopyExtended.UInt64Method, userCopyExtended.UInt64Method)
+	is.Equal(expectedUserCopyExtended.MethodWithContext, userCopyExtended.MethodWithContext)
+	is.Equal(expectedUserCopyExtended.SuperMethod, userCopyExtended.SuperMethod)
+	is.Equal(expectedUserCopyExtended.StringSlice, userCopyExtended.StringSlice)
+	is.Equal(expectedUserCopyExtended.IntSlice, userCopyExtended.IntSlice)
 }
 
 func TestCopyFrom(t *testing.T) {
@@ -55,27 +90,47 @@ func TestCopyFrom(t *testing.T) {
 	now := time.Now()
 
 	user := &User{}
+	userExpected := NewUser(now)
 	userCopy := NewUserCopy(now)
-	expected := NewUser(now)
+	// userCopyExtended := NewUserCopyExtended(now)
 
 	is.Nil(Copy(user).From(userCopy))
 
-	is.Equal(expected.Name, user.Name)
-	is.Equal(expected.Date, user.Date)
-	is.Equal(expected.AFloat32, user.AFloat32)
-	is.Equal(expected.AFloat64, user.AFloat64)
-	is.Equal(expected.AnInt, user.AnInt)
-	is.Equal(expected.AnInt8, user.AnInt8)
-	is.Equal(expected.AnInt16, user.AnInt16)
-	is.Equal(expected.AnInt32, user.AnInt32)
-	is.Equal(expected.AnInt64, user.AnInt64)
-	is.Equal(expected.AnUInt, user.AnUInt)
-	is.Equal(expected.AnUInt8, user.AnUInt8)
-	is.Equal(expected.AnUInt16, user.AnUInt16)
-	is.Equal(expected.AnUInt32, user.AnUInt32)
-	is.Equal(expected.AnUInt64, user.AnUInt64)
-	is.Equal(expected.AStringSlice, user.AStringSlice)
-	is.Equal(expected.AnIntSlice, user.AnIntSlice)
+	is.Equal(userExpected.Name, user.Name)
+	is.Equal(userExpected.Date, user.Date)
+	is.Equal(userExpected.AFloat32, user.AFloat32)
+	is.Equal(userExpected.AFloat64, user.AFloat64)
+	is.Equal(userExpected.AnInt, user.AnInt)
+	is.Equal(userExpected.AnInt8, user.AnInt8)
+	is.Equal(userExpected.AnInt16, user.AnInt16)
+	is.Equal(userExpected.AnInt32, user.AnInt32)
+	is.Equal(userExpected.AnInt64, user.AnInt64)
+	is.Equal(userExpected.AnUInt, user.AnUInt)
+	is.Equal(userExpected.AnUInt8, user.AnUInt8)
+	is.Equal(userExpected.AnUInt16, user.AnUInt16)
+	is.Equal(userExpected.AnUInt32, user.AnUInt32)
+	is.Equal(userExpected.AnUInt64, user.AnUInt64)
+	is.Equal(userExpected.AStringSlice, user.AStringSlice)
+	is.Equal(userExpected.AnIntSlice, user.AnIntSlice)
+
+	// is.Nil(Copy(user).From(userCopyExtended))
+	//
+	// is.Equal(userExpected.Name, user.Name)
+	// is.Equal(userExpected.Date, user.Date)
+	// is.Equal(userExpected.AFloat32, user.AFloat32)
+	// is.Equal(userExpected.AFloat64, user.AFloat64)
+	// is.Equal(userExpected.AnInt, user.AnInt)
+	// is.Equal(userExpected.AnInt8, user.AnInt8)
+	// is.Equal(userExpected.AnInt16, user.AnInt16)
+	// is.Equal(userExpected.AnInt32, user.AnInt32)
+	// is.Equal(userExpected.AnInt64, user.AnInt64)
+	// is.Equal(userExpected.AnUInt, user.AnUInt)
+	// is.Equal(userExpected.AnUInt8, user.AnUInt8)
+	// is.Equal(userExpected.AnUInt16, user.AnUInt16)
+	// is.Equal(userExpected.AnUInt32, user.AnUInt32)
+	// is.Equal(userExpected.AnUInt64, user.AnUInt64)
+	// is.Equal(userExpected.AStringSlice, user.AStringSlice)
+	// is.Equal(userExpected.AnIntSlice, user.AnIntSlice)
 }
 
 // -----------------------------------------------------------------------------
@@ -212,6 +267,10 @@ type UserCopy struct {
 	SuperMethod       string      `json:"super_method" deepcopier:"field:MethodWithDifferentName"`
 }
 
+type UserCopyExtended struct {
+	UserCopy
+}
+
 func NewUserCopy(now time.Time) *UserCopy {
 	return &UserCopy{
 		Title:             "Chuck Norris",
@@ -243,5 +302,11 @@ func NewUserCopy(now time.Time) *UserCopy {
 		UInt64Method:      uint64(10),
 		MethodWithContext: "1",
 		SuperMethod:       "hello",
+	}
+}
+
+func NewUserCopyExtended(now time.Time) *UserCopyExtended {
+	return &UserCopyExtended{
+		UserCopy: *NewUserCopy(now),
 	}
 }
