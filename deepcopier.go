@@ -70,7 +70,22 @@ func (dc *DeepCopier) From(tagged interface{}) error {
 
 // ProcessCopy processes copy.
 func (dc *DeepCopier) ProcessCopy() error {
-	fields, _ := reflections.Fields(dc.Tagged)
+	fields := []string{}
+
+	val := reflect.ValueOf(dc.Tagged).Elem()
+
+	for i := 0; i < val.NumField(); i++ {
+		typ := val.Type().Field(i)
+
+		// Embedded struct
+		if typ.Anonymous {
+			f, _ := reflections.Fields(val.Field(i).Interface())
+			fields = append(fields, f...)
+		} else {
+			fields = append(fields, typ.Name)
+		}
+	}
+
 	for _, field := range fields {
 		fieldOptions := &FieldOptions{
 			SourceField:      field,
@@ -78,7 +93,9 @@ func (dc *DeepCopier) ProcessCopy() error {
 			WithContext:      false,
 			Skip:             false,
 		}
+
 		tagOptions, _ := reflections.GetFieldTag(dc.Tagged, field, TagName)
+
 		if tagOptions != "" {
 			opts := dc.GetTagOptions(tagOptions)
 			if _, ok := opts[FieldOptionName]; ok {
@@ -96,6 +113,7 @@ func (dc *DeepCopier) ProcessCopy() error {
 				fieldOptions.Skip = true
 			}
 		}
+
 		if err := dc.SetField(fieldOptions); err != nil {
 			return err
 		}
