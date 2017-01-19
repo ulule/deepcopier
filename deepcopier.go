@@ -204,6 +204,11 @@ func (dc *DeepCopier) SetField(options *FieldOptions) error {
 func (dc *DeepCopier) SetFieldValue(entity interface{}, name string, value reflect.Value) error {
 	kind := value.Kind()
 
+	if kind == reflect.Ptr {
+		value = value.Elem()
+		kind = value.Kind()
+	}
+
 	// Maps
 	if kind == reflect.Map {
 		switch v := value.Interface().(type) {
@@ -301,6 +306,7 @@ func (dc *DeepCopier) SetFieldValue(entity interface{}, name string, value refle
 		return nil
 	case reflect.String:
 		if err := reflections.SetField(entity, name, value.String()); err != nil {
+			fmt.Println(entity)
 			return err
 		}
 		return nil
