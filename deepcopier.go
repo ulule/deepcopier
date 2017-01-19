@@ -306,7 +306,6 @@ func (dc *DeepCopier) SetFieldValue(entity interface{}, name string, value refle
 		return nil
 	case reflect.String:
 		if err := reflections.SetField(entity, name, value.String()); err != nil {
-			fmt.Println(entity)
 			return err
 		}
 		return nil
