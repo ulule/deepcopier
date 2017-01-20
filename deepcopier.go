@@ -205,6 +205,9 @@ func (dc *DeepCopier) SetFieldValue(entity interface{}, name string, value refle
 	kind := value.Kind()
 
 	if kind == reflect.Ptr {
+		if value.IsNil() {
+			return nil
+		}
 		value = value.Elem()
 		kind = value.Kind()
 	}
