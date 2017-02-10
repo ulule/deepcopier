@@ -1,6 +1,7 @@
 package deepcopier
 
 import (
+	"errors"
 	"fmt"
 	"reflect"
 	"strings"
@@ -42,6 +43,44 @@ type FieldOptions struct {
 	Skip             bool
 }
 
+// NewFieldOptions returns a FieldOptions instance for the given instance's field.
+func NewFieldOptions(instance interface{}, field string, reversed bool) *FieldOptions {
+	fieldOptions := &FieldOptions{
+		SourceField:      field,
+		DestinationField: field,
+		WithContext:      false,
+		Skip:             false,
+	}
+
+	tagOptions, _ := reflections.GetFieldTag(instance, field, TagName)
+
+	if tagOptions == "" {
+		return fieldOptions
+	}
+
+	opts := GetTagOptions(tagOptions)
+
+	if _, ok := opts[FieldOptionName]; ok {
+		fieldName := opts[FieldOptionName]
+
+		if !reversed {
+			fieldOptions.SourceField = fieldName
+		} else {
+			fieldOptions.DestinationField = fieldName
+		}
+	}
+
+	if _, ok := opts[ContextOptionName]; ok {
+		fieldOptions.WithContext = true
+	}
+
+	if _, ok := opts[SkipOptionName]; ok {
+		fieldOptions.Skip = true
+	}
+
+	return fieldOptions
+}
+
 // Copy sets the source.
 func Copy(source interface{}) *DeepCopier {
 	return &DeepCopier{
@@ -55,6 +94,7 @@ func Copy(source interface{}) *DeepCopier {
 func (dc *DeepCopier) To(tagged interface{}) error {
 	dc.Destination = tagged
 	dc.Tagged = tagged
+
 	return dc.ProcessCopy()
 }
 
@@ -65,59 +105,39 @@ func (dc *DeepCopier) From(tagged interface{}) error {
 	dc.Source = tagged
 	dc.Tagged = tagged
 	dc.Reversed = true
+
 	return dc.ProcessCopy()
 }
 
 // ProcessCopy processes copy.
 func (dc *DeepCopier) ProcessCopy() error {
-	fields := []string{}
+	var (
+		fields      = []string{}
+		taggedValue = reflect.ValueOf(dc.Tagged).Elem()
+		taggedType  = taggedValue.Type()
+	)
 
-	val := reflect.ValueOf(dc.Tagged).Elem()
-
-	for i := 0; i < val.NumField(); i++ {
-		typ := val.Type().Field(i)
+	for i := 0; i < taggedValue.NumField(); i++ {
+		var (
+			fv = taggedValue.Field(i)
+			ft = taggedType.Field(i)
+		)
 
 		// Embedded struct
-		if typ.Anonymous {
-			f, _ := reflections.Fields(val.Field(i).Interface())
+		if ft.Anonymous {
+			f, _ := reflections.Fields(fv.Interface())
 			fields = append(fields, f...)
 		} else {
-			fields = append(fields, typ.Name)
+			fields = append(fields, ft.Name)
 		}
 	}
 
 	for _, field := range fields {
-		fieldOptions := &FieldOptions{
-			SourceField:      field,
-			DestinationField: field,
-			WithContext:      false,
-			Skip:             false,
-		}
-
-		tagOptions, _ := reflections.GetFieldTag(dc.Tagged, field, TagName)
-
-		if tagOptions != "" {
-			opts := dc.GetTagOptions(tagOptions)
-			if _, ok := opts[FieldOptionName]; ok {
-				fieldName := opts[FieldOptionName]
-				if !dc.Reversed {
-					fieldOptions.SourceField = fieldName
-				} else {
-					fieldOptions.DestinationField = fieldName
-				}
-			}
-			if _, ok := opts[ContextOptionName]; ok {
-				fieldOptions.WithContext = true
-			}
-			if _, ok := opts[SkipOptionName]; ok {
-				fieldOptions.Skip = true
-			}
-		}
-
-		if err := dc.SetField(fieldOptions); err != nil {
+		if err := dc.SetField(NewFieldOptions(dc.Tagged, field, dc.Reversed)); err != nil {
 			return err
 		}
 	}
+
 	return nil
 }
 
@@ -136,15 +156,18 @@ func (dc *DeepCopier) WithContext(context map[string]interface{}) *DeepCopier {
 // -----------------------------------------------------------------------------
 
 // GetTagOptions parses deepcopier tag field and returns options.
-func (dc *DeepCopier) GetTagOptions(value string) map[string]string {
+func GetTagOptions(value string) map[string]string {
 	options := map[string]string{}
+
 	for _, opt := range strings.Split(value, ";") {
 		o := strings.Split(opt, ":")
+
 		// deepcopier:"keyword; without; value;"
 		if len(o) == 1 {
 			k := o[0]
 			options[k] = ""
 		}
+
 		// deepcopier:"key:value; anotherkey:anothervalue"
 		if len(o) == 2 {
 			k, v := o[0], o[1]
@@ -384,6 +407,85 @@ func (dc *DeepCopier) HandleMethod(options *FieldOptions) error {
 
 	if err := dc.SetFieldValue(dc.Destination, options.DestinationField, results[0]); err != nil {
 		return err
+	}
+
+	return nil
+}
+
+// -----------------------------------------------------------------------------
+// Refacto
+// -----------------------------------------------------------------------------
+
+func getMethods(t reflect.Type) []string {
+	var methods []string
+	for i := 0; i < t.NumMethod(); i++ {
+		methods = append(methods, t.Method(i).Name)
+	}
+	return methods
+}
+
+// InStringSlice checks if the given string is in the given slice of string
+func InStringSlice(haystack []string, needle string) bool {
+	for _, str := range haystack {
+		if needle == str {
+			return true
+		}
+	}
+	return false
+}
+
+// Copier is the brand new way to process copy.
+func Copier(from interface{}, to interface{}) error {
+	var (
+		fromValue   = reflect.Indirect(reflect.ValueOf(from))
+		fromType    = fromValue.Type()
+		fromMethods = getMethods(fromType)
+		toValue     = reflect.Indirect(reflect.ValueOf(to))
+	)
+
+	// Pointer only for receiver
+	if !toValue.CanAddr() {
+		return errors.New("to value is unaddressable")
+	}
+
+	for i := 0; i < fromValue.NumField(); i++ {
+		var (
+			fromFieldValue = fromValue.Field(i)
+			fromFieldType  = fromValue.Type().Field(i)
+			fromFieldName  = fromFieldType.Name
+		)
+
+		for ii := 0; ii < toValue.NumField(); ii++ {
+			var (
+				toFieldValue = toValue.Field(ii)
+				toFieldType  = toValue.Type().Field(ii)
+				toFieldName  = toFieldType.Name
+			)
+
+			// Method() -> field -- TODO: handle WithContext
+			if InStringSlice(fromMethods, toFieldName) {
+				method := reflect.ValueOf(from).MethodByName(toFieldName)
+				if method.IsValid() {
+					toFieldValue.Set(method.Call([]reflect.Value{})[0])
+				}
+				continue
+			}
+
+			// Skip if fields don't match or if original value is invalid
+			if fromFieldName != toFieldName || !fromFieldValue.IsValid() {
+				continue
+			}
+
+			// Ptr -> Value
+			if fromFieldType.Type.Kind() == reflect.Ptr && toFieldType.Type.Kind() != reflect.Ptr {
+				toFieldValue.Set(reflect.Indirect(fromFieldValue))
+				continue
+			}
+
+			if fromFieldType.Type.AssignableTo(toFieldType.Type) {
+				toFieldValue.Set(fromFieldValue)
+			}
+		}
 	}
 
 	return nil

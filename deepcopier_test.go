@@ -316,3 +316,91 @@ func NewUserCopyExtended(now time.Time, pointer *string) *UserCopyExtended {
 		UserCopy: *NewUserCopy(now, pointer),
 	}
 }
+
+// ----------------------------------------------------------------------------
+// New refacto
+// ----------------------------------------------------------------------------
+type R1 struct {
+	String string
+}
+
+type T1 struct {
+	Int64            int64
+	String           string
+	StringPtr        *string
+	StringPtrToValue *string
+	Time             time.Time
+	TimePtr          *time.Time
+	TimePtrToValue   *time.Time
+	SliceString      []string
+	SliceInt         []int
+	NullString       null.String
+	R1               R1
+}
+
+func (T1) MethodString() string {
+	return "method string"
+}
+
+type T2 struct {
+	Int64            int64
+	String           string
+	StringPtr        *string
+	StringPtrToValue string
+	Time             time.Time
+	TimePtr          *time.Time
+	TimePtrToValue   time.Time
+	SliceString      []string
+	SliceInt         []int
+	NullString       null.String
+	MethodString     string
+}
+
+func TestCopier(t *testing.T) {
+	var (
+		strPtr        = "ptr"
+		strPtrToValue = "ptrToValue"
+		now           = time.Now()
+		sliceStr      = []string{"Chuck", "Norris"}
+		sliceInt      = []int{0, 8, 15}
+		nullStr       = null.StringFrom("I'm null")
+	)
+
+	t1 := &T1{
+		Int64:            1,
+		String:           "hello",
+		StringPtr:        &strPtr,
+		StringPtrToValue: &strPtrToValue,
+		Time:             now,
+		TimePtr:          &now,
+		TimePtrToValue:   &now,
+		SliceString:      sliceStr,
+		SliceInt:         sliceInt,
+		NullString:       nullStr,
+	}
+
+	t2 := &T2{}
+
+	assert.Nil(t, Copier(t1, t2))
+
+	table := []struct {
+		in  interface{}
+		out interface{}
+	}{
+		{t1.Int64, t2.Int64},
+		{t1.String, t2.String},
+		{t1.StringPtr, t2.StringPtr},
+		{strPtrToValue, t2.StringPtrToValue},
+		{t1.Time, t2.Time},
+		{t1.TimePtr, t2.TimePtr},
+		{*t1.TimePtrToValue, t2.TimePtrToValue},
+		{t1.SliceString, t2.SliceString},
+		{t1.SliceInt, t2.SliceInt},
+		{t1.NullString, t2.NullString},
+		{t1.MethodString(), t2.MethodString},
+	}
+
+	for _, tt := range table {
+		assert.Equal(t, tt.in, tt.out)
+	}
+}
