@@ -320,9 +320,9 @@ func NewUserCopyExtended(now time.Time, pointer *string) *UserCopyExtended {
 // ----------------------------------------------------------------------------
 // New refacto
 // ----------------------------------------------------------------------------
-type R1 struct {
-	String string
-}
+
+type R1 struct{ String string }
+type R2 struct{ String string }
 
 type T1 struct {
 	Int64            int64
@@ -334,8 +334,14 @@ type T1 struct {
 	TimePtrToValue   *time.Time
 	SliceString      []string
 	SliceInt         []int
+	Map              map[string]interface{}
 	NullString       null.String
 	R1               R1
+	R1Ptr            *R1
+	R1PtrToValue     *R1
+	R2               R2
+	R2Ptr            *R2
+	R2PtrToValue     *R2
 }
 
 func (T1) MethodString() string {
@@ -352,8 +358,15 @@ type T2 struct {
 	TimePtrToValue   time.Time
 	SliceString      []string
 	SliceInt         []int
+	Map              map[string]interface{}
 	NullString       null.String
 	MethodString     string
+	R1               R1
+	R1Ptr            *R1
+	R1PtrToValue     R1
+	R2               R2
+	R2Ptr            *R2
+	R2PtrToValue     R2
 }
 
 func TestCopier(t *testing.T) {
@@ -364,7 +377,10 @@ func TestCopier(t *testing.T) {
 		sliceStr      = []string{"Chuck", "Norris"}
 		sliceInt      = []int{0, 8, 15}
 		nullStr       = null.StringFrom("I'm null")
+		mapInterfaces = map[string]interface{}{"message": "ok", "valid": true}
 	)
+
+	r1 := &R1{String: "r1 string"}
 
 	t1 := &T1{
 		Int64:            1,
@@ -377,6 +393,10 @@ func TestCopier(t *testing.T) {
 		SliceString:      sliceStr,
 		SliceInt:         sliceInt,
 		NullString:       nullStr,
+		Map:              mapInterfaces,
+		R1:               *r1,
+		R1Ptr:            r1,
+		R1PtrToValue:     r1,
 	}
 
 	t2 := &T2{}
@@ -396,8 +416,12 @@ func TestCopier(t *testing.T) {
 		{*t1.TimePtrToValue, t2.TimePtrToValue},
 		{t1.SliceString, t2.SliceString},
 		{t1.SliceInt, t2.SliceInt},
+		{t1.Map, t2.Map},
 		{t1.NullString, t2.NullString},
 		{t1.MethodString(), t2.MethodString},
+		{t1.R1, t2.R1},
+		{t1.R1Ptr, t2.R1Ptr},
+		{*r1, t2.R1PtrToValue},
 	}
 
 	for _, tt := range table {

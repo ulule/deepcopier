@@ -477,7 +477,7 @@ func Copier(from interface{}, to interface{}) error {
 			}
 
 			// Ptr -> Value
-			if fromFieldType.Type.Kind() == reflect.Ptr && toFieldType.Type.Kind() != reflect.Ptr {
+			if fromFieldType.Type.Kind() == reflect.Ptr && !fromFieldValue.IsNil() && toFieldType.Type.Kind() != reflect.Ptr {
 				toFieldValue.Set(reflect.Indirect(fromFieldValue))
 				continue
 			}
