@@ -416,6 +416,12 @@ func (dc *DeepCopier) HandleMethod(options *FieldOptions) error {
 // Refacto
 // -----------------------------------------------------------------------------
 
+// Options are copier options.
+type Options struct {
+	// Context given to WithContext() method.
+	Context map[string]interface{}
+}
+
 func getMethods(t reflect.Type) []string {
 	var methods []string
 	for i := 0; i < t.NumMethod(); i++ {
@@ -435,8 +441,9 @@ func InStringSlice(haystack []string, needle string) bool {
 }
 
 // Copier is the brand new way to process copy.
-func Copier(from interface{}, to interface{}) error {
+func Copier(from interface{}, to interface{}, args ...Options) error {
 	var (
+		options     = Options{}
 		fromValue   = reflect.Indirect(reflect.ValueOf(from))
 		fromType    = fromValue.Type()
 		fromMethods = getMethods(fromType)
@@ -446,6 +453,10 @@ func Copier(from interface{}, to interface{}) error {
 	// Pointer only for receiver
 	if !toValue.CanAddr() {
 		return errors.New("to value is unaddressable")
+	}
+
+	if len(args) > 0 {
+		options = args[0]
 	}
 
 	for i := 0; i < fromValue.NumField(); i++ {
@@ -465,26 +476,50 @@ func Copier(from interface{}, to interface{}) error {
 				toFieldType  = toValue.Type().Field(ii)
 				toFieldName  = toFieldType.Name
 				toFieldTag   = toFieldType.Tag.Get(TagName)
-				srcName      = toFieldName
+				// Options
+				fieldName   = toFieldName
+				withContext = false
 			)
 
-			options := GetTagOptions(toFieldTag)
+			tagOptions := GetTagOptions(toFieldTag)
 
-			// Get real source field / method name from struct tag
-			if v, ok := options[FieldOptionName]; ok && v != "" {
-				srcName = v
-			}
-
-			// Method() -> field -- TODO: handle WithContext
-			if InStringSlice(fromMethods, srcName) {
-				method := reflect.ValueOf(from).MethodByName(srcName)
-				if method.IsValid() {
-					toFieldValue.Set(method.Call([]reflect.Value{})[0])
-				}
+			// If skip option is set, bypass copy.
+			if v, ok := tagOptions[SkipOptionName]; ok && v != "" {
 				continue
 			}
 
-			if srcName != fromFieldName {
+			// Get real source field / method name from struct tag.
+			if v, ok := tagOptions[FieldOptionName]; ok && v != "" {
+				fieldName = v
+			}
+
+			// Give context as function argument?
+			if v, ok := tagOptions[ContextOptionName]; ok && v != "" {
+				withContext = true
+			}
+
+			// Method() -> field -- TODO: handle WithContext
+			if InStringSlice(fromMethods, fieldName) {
+				method := reflect.ValueOf(from).MethodByName(fieldName)
+
+				if !method.IsValid() {
+					return fmt.Errorf("method %v in source is not valid", fieldName)
+				}
+
+				var results []reflect.Value
+
+				if withContext {
+					results = method.Call([]reflect.Value{reflect.ValueOf(options.Context)})
+				} else {
+					results = method.Call([]reflect.Value{})
+				}
+
+				toFieldValue.Set(results[0])
+
+				continue
+			}
+
+			if fieldName != fromFieldName {
 				continue
 			}
 

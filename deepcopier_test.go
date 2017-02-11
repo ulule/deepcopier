@@ -354,27 +354,32 @@ func (T1) AnotherMethodString() string {
 	return "another method string"
 }
 
+func (T1) MethodWithContext(c map[string]interface{}) map[string]interface{} {
+	return c
+}
+
 type T2 struct {
-	Int64            int64
-	Int64Renamed     int64 `deepcopier:"field:Int64"`
-	String           string
-	StringPtr        *string
-	StringPtrToValue string
-	Time             time.Time
-	TimePtr          *time.Time
-	TimePtrToValue   time.Time
-	SliceString      []string
-	SliceInt         []int
-	Map              map[string]interface{}
-	NullString       null.String
-	MethodString     string
-	MString          string `deepcopier:"field:AnotherMethodString"`
-	R1               R1
-	R1Ptr            *R1
-	R1PtrToValue     R1
-	R2               R2
-	R2Ptr            *R2
-	R2PtrToValue     R2
+	Int64             int64
+	Int64Renamed      int64 `deepcopier:"field:Int64"`
+	String            string
+	StringPtr         *string
+	StringPtrToValue  string
+	Time              time.Time
+	TimePtr           *time.Time
+	TimePtrToValue    time.Time
+	SliceString       []string
+	SliceInt          []int
+	Map               map[string]interface{}
+	NullString        null.String
+	MethodString      string
+	MString           string                 `deepcopier:"field:AnotherMethodString"`
+	MethodWithContext map[string]interface{} `deepcopier:"context:true"`
+	R1                R1
+	R1Ptr             *R1
+	R1PtrToValue      R1
+	R2                R2
+	R2Ptr             *R2
+	R2PtrToValue      R2
 }
 
 func TestCopier(t *testing.T) {
@@ -386,6 +391,7 @@ func TestCopier(t *testing.T) {
 		sliceInt      = []int{0, 8, 15}
 		nullStr       = null.StringFrom("I'm null")
 		mapInterfaces = map[string]interface{}{"message": "ok", "valid": true}
+		methodContext = map[string]interface{}{"url": "https://ulule.com"}
 	)
 
 	r1 := &R1{String: "r1 string"}
@@ -409,7 +415,11 @@ func TestCopier(t *testing.T) {
 
 	t2 := &T2{}
 
-	assert.Nil(t, Copier(t1, t2))
+	options := Options{
+		Context: methodContext,
+	}
+
+	assert.Nil(t, Copier(t1, t2, options))
 
 	table := []struct {
 		in  interface{}
@@ -429,6 +439,7 @@ func TestCopier(t *testing.T) {
 		{t1.NullString, t2.NullString},
 		{t1.MethodString(), t2.MethodString},
 		{t1.AnotherMethodString(), t2.MString},
+		{t1.MethodWithContext(methodContext), t2.MethodWithContext},
 		{t1.R1, t2.R1},
 		{t1.R1Ptr, t2.R1Ptr},
 		{*r1, t2.R1PtrToValue},
