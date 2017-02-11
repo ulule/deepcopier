@@ -1,6 +1,8 @@
 package deepcopier
 
 import (
+	"fmt"
+	"reflect"
 	"testing"
 	"time"
 
@@ -348,8 +350,13 @@ func (T1) MethodString() string {
 	return "method string"
 }
 
+func (T1) AnotherMethodString() string {
+	return "another method string"
+}
+
 type T2 struct {
 	Int64            int64
+	Int64Renamed     int64 `deepcopier:"field:Int64"`
 	String           string
 	StringPtr        *string
 	StringPtrToValue string
@@ -361,6 +368,7 @@ type T2 struct {
 	Map              map[string]interface{}
 	NullString       null.String
 	MethodString     string
+	MString          string `deepcopier:"field:AnotherMethodString"`
 	R1               R1
 	R1Ptr            *R1
 	R1PtrToValue     R1
@@ -408,6 +416,7 @@ func TestCopier(t *testing.T) {
 		out interface{}
 	}{
 		{t1.Int64, t2.Int64},
+		{t1.Int64, t2.Int64Renamed},
 		{t1.String, t2.String},
 		{t1.StringPtr, t2.StringPtr},
 		{strPtrToValue, t2.StringPtrToValue},
@@ -419,12 +428,18 @@ func TestCopier(t *testing.T) {
 		{t1.Map, t2.Map},
 		{t1.NullString, t2.NullString},
 		{t1.MethodString(), t2.MethodString},
+		{t1.AnotherMethodString(), t2.MString},
 		{t1.R1, t2.R1},
 		{t1.R1Ptr, t2.R1Ptr},
 		{*r1, t2.R1PtrToValue},
 	}
 
 	for _, tt := range table {
-		assert.Equal(t, tt.in, tt.out)
+		assert.Equal(t, tt.in, tt.out,
+			fmt.Sprintf("%v (%v) not equal to %v (%v)",
+				tt.in,
+				reflect.TypeOf(tt.in),
+				tt.out,
+				reflect.TypeOf(tt.out)))
 	}
 }

@@ -455,24 +455,36 @@ func Copier(from interface{}, to interface{}) error {
 			fromFieldName  = fromFieldType.Name
 		)
 
+		if !fromFieldValue.IsValid() {
+			continue
+		}
+
 		for ii := 0; ii < toValue.NumField(); ii++ {
 			var (
 				toFieldValue = toValue.Field(ii)
 				toFieldType  = toValue.Type().Field(ii)
 				toFieldName  = toFieldType.Name
+				toFieldTag   = toFieldType.Tag.Get(TagName)
+				srcName      = toFieldName
 			)
 
+			options := GetTagOptions(toFieldTag)
+
+			// Get real source field / method name from struct tag
+			if v, ok := options[FieldOptionName]; ok && v != "" {
+				srcName = v
+			}
+
 			// Method() -> field -- TODO: handle WithContext
-			if InStringSlice(fromMethods, toFieldName) {
-				method := reflect.ValueOf(from).MethodByName(toFieldName)
+			if InStringSlice(fromMethods, srcName) {
+				method := reflect.ValueOf(from).MethodByName(srcName)
 				if method.IsValid() {
 					toFieldValue.Set(method.Call([]reflect.Value{})[0])
 				}
 				continue
 			}
 
-			// Skip if fields don't match or if original value is invalid
-			if fromFieldName != toFieldName || !fromFieldValue.IsValid() {
+			if srcName != fromFieldName {
 				continue
 			}
 
