@@ -18,16 +18,8 @@ const (
 	SkipOptionName = "skip"
 )
 
-// ----------------------------------------------------------------------------
-// Struct tag options
-// ----------------------------------------------------------------------------
-
 // TagOptions are struct tag options.
 type TagOptions map[string]string
-
-// ----------------------------------------------------------------------------
-// Options
-// ----------------------------------------------------------------------------
 
 // Options are copier options.
 type Options struct {
@@ -36,10 +28,6 @@ type Options struct {
 	// Reversed reverses struct tag checkings.
 	Reversed bool
 }
-
-// ----------------------------------------------------------------------------
-// Deepcopier
-// ----------------------------------------------------------------------------
 
 // DeepCopier deep copies a struct to/from a struct.
 type DeepCopier struct {
@@ -82,24 +70,18 @@ func cp(dst interface{}, src interface{}, args ...Options) error {
 	var (
 		options        = Options{}
 		srcValue       = reflect.Indirect(reflect.ValueOf(src))
+		dstValue       = reflect.Indirect(reflect.ValueOf(dst))
 		srcFieldNames  = getFieldNames(src)
 		srcMethodNames = getMethodNames(src)
-		dstValue       = reflect.Indirect(reflect.ValueOf(dst))
 	)
 
-	// Options are given
 	if len(args) > 0 {
 		options = args[0]
 	}
 
-	// Pointer only for receiver
 	if !dstValue.CanAddr() {
 		return errors.New("dst value is unaddressable")
 	}
-
-	//
-	// Methods
-	//
 
 	for _, m := range srcMethodNames {
 		name, opts := getRelatedField(dst, m)
@@ -133,10 +115,6 @@ func cp(dst interface{}, src interface{}, args ...Options) error {
 		}
 	}
 
-	//
-	// Fields
-	//
-
 	for _, f := range srcFieldNames {
 		var (
 			srcFieldValue                = srcValue.FieldByName(f)
@@ -148,18 +126,15 @@ func cp(dst interface{}, src interface{}, args ...Options) error {
 
 		if options.Reversed {
 			tagOptions = getTagOptions(srcFieldType.Tag.Get(TagName))
-
 			if v, ok := tagOptions[FieldOptionName]; ok && v != "" {
 				dstFieldName = v
 			}
 		} else {
 			if name, opts := getRelatedField(dst, srcFieldName); name != "" {
-				tagOptions = opts
-				dstFieldName = name
+				dstFieldName, tagOptions = name, opts
 			}
 		}
 
-		// Struct tag -- deepcopier:"skip"
 		if _, ok := tagOptions[SkipOptionName]; ok {
 			continue
 		}
@@ -182,10 +157,6 @@ func cp(dst interface{}, src interface{}, args ...Options) error {
 
 	return nil
 }
-
-// ----------------------------------------------------------------------------
-// Helpers
-// ----------------------------------------------------------------------------
 
 // getTagOptions parses deepcopier tag field and returns options.
 func getTagOptions(value string) TagOptions {
