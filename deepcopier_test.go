@@ -23,69 +23,87 @@ func TestCopyTo(t *testing.T) {
 
 	is.Nil(Copy(user).WithContext(map[string]interface{}{"version": "1"}).To(userCopy))
 
-	is.Equal(expectedUserCopy.Title, userCopy.Title)
-	is.Equal(expectedUserCopy.Date, userCopy.Date)
-	is.Equal(expectedUserCopy.Float32, userCopy.Float32)
-	is.Equal(expectedUserCopy.Float64, userCopy.Float64)
-	is.Equal(expectedUserCopy.Int, userCopy.Int)
-	is.Equal(expectedUserCopy.Int8, userCopy.Int8)
-	is.Equal(expectedUserCopy.Int16, userCopy.Int16)
-	is.Equal(expectedUserCopy.Int32, userCopy.Int32)
-	is.Equal(expectedUserCopy.Int64, userCopy.Int64)
-	is.Equal(expectedUserCopy.UInt, userCopy.UInt)
-	is.Equal(expectedUserCopy.UInt8, userCopy.UInt8)
-	is.Equal(expectedUserCopy.UInt16, userCopy.UInt16)
-	is.Equal(expectedUserCopy.UInt32, userCopy.UInt32)
-	is.Equal(expectedUserCopy.UInt64, userCopy.UInt64)
-	is.Equal(expectedUserCopy.StringSlice, userCopy.StringSlice)
-	is.Equal(expectedUserCopy.IntSlice, userCopy.IntSlice)
-	is.Equal(expectedUserCopy.IntMethod, userCopy.IntMethod)
-	is.Equal(expectedUserCopy.Int8Method, userCopy.Int8Method)
-	is.Equal(expectedUserCopy.Int16Method, userCopy.Int16Method)
-	is.Equal(expectedUserCopy.Int32Method, userCopy.Int32Method)
-	is.Equal(expectedUserCopy.Int64Method, userCopy.Int64Method)
-	is.Equal(expectedUserCopy.UIntMethod, userCopy.UIntMethod)
-	is.Equal(expectedUserCopy.UInt8Method, userCopy.UInt8Method)
-	is.Equal(expectedUserCopy.UInt16Method, userCopy.UInt16Method)
-	is.Equal(expectedUserCopy.UInt32Method, userCopy.UInt32Method)
-	is.Equal(expectedUserCopy.UInt64Method, userCopy.UInt64Method)
-	is.Equal(expectedUserCopy.MethodWithContext, userCopy.MethodWithContext)
-	is.Equal(expectedUserCopy.SuperMethod, userCopy.SuperMethod)
-	is.Equal(expectedUserCopy.StringSlice, userCopy.StringSlice)
-	is.Equal(expectedUserCopy.IntSlice, userCopy.IntSlice)
+	userCopyTests := []struct {
+		in  interface{}
+		out interface{}
+	}{
+		{expectedUserCopy.Title, userCopy.Title},
+		{expectedUserCopy.Date, userCopy.Date},
+		{expectedUserCopy.Float32, userCopy.Float32},
+		{expectedUserCopy.Float64, userCopy.Float64},
+		{expectedUserCopy.Int, userCopy.Int},
+		{expectedUserCopy.Int8, userCopy.Int8},
+		{expectedUserCopy.Int16, userCopy.Int16},
+		{expectedUserCopy.Int32, userCopy.Int32},
+		{expectedUserCopy.Int64, userCopy.Int64},
+		{expectedUserCopy.UInt, userCopy.UInt},
+		{expectedUserCopy.UInt8, userCopy.UInt8},
+		{expectedUserCopy.UInt16, userCopy.UInt16},
+		{expectedUserCopy.UInt32, userCopy.UInt32},
+		{expectedUserCopy.UInt64, userCopy.UInt64},
+		{expectedUserCopy.StringSlice, userCopy.StringSlice},
+		{expectedUserCopy.IntSlice, userCopy.IntSlice},
+		{expectedUserCopy.IntMethod, userCopy.IntMethod},
+		{expectedUserCopy.Int8Method, userCopy.Int8Method},
+		{expectedUserCopy.Int16Method, userCopy.Int16Method},
+		{expectedUserCopy.Int32Method, userCopy.Int32Method},
+		{expectedUserCopy.Int64Method, userCopy.Int64Method},
+		{expectedUserCopy.UIntMethod, userCopy.UIntMethod},
+		{expectedUserCopy.UInt8Method, userCopy.UInt8Method},
+		{expectedUserCopy.UInt16Method, userCopy.UInt16Method},
+		{expectedUserCopy.UInt32Method, userCopy.UInt32Method},
+		{expectedUserCopy.UInt64Method, userCopy.UInt64Method},
+		{expectedUserCopy.MethodWithContext, userCopy.MethodWithContext},
+		{expectedUserCopy.SuperMethod, userCopy.SuperMethod},
+		{expectedUserCopy.StringSlice, userCopy.StringSlice},
+		{expectedUserCopy.IntSlice, userCopy.IntSlice},
+	}
+
+	for _, tt := range userCopyTests {
+		is.Equal(tt.in, tt.out)
+	}
 
 	is.Nil(Copy(user).WithContext(map[string]interface{}{"version": "1"}).To(userCopyExtended))
 
-	is.Equal(expectedUserCopyExtended.Title, userCopyExtended.Title)
-	is.Equal(expectedUserCopyExtended.Date, userCopyExtended.Date)
-	is.Equal(expectedUserCopyExtended.Float32, userCopyExtended.Float32)
-	is.Equal(expectedUserCopyExtended.Float64, userCopyExtended.Float64)
-	is.Equal(expectedUserCopyExtended.Int, userCopyExtended.Int)
-	is.Equal(expectedUserCopyExtended.Int8, userCopyExtended.Int8)
-	is.Equal(expectedUserCopyExtended.Int16, userCopyExtended.Int16)
-	is.Equal(expectedUserCopyExtended.Int32, userCopyExtended.Int32)
-	is.Equal(expectedUserCopyExtended.Int64, userCopyExtended.Int64)
-	is.Equal(expectedUserCopyExtended.UInt, userCopyExtended.UInt)
-	is.Equal(expectedUserCopyExtended.UInt8, userCopyExtended.UInt8)
-	is.Equal(expectedUserCopyExtended.UInt16, userCopyExtended.UInt16)
-	is.Equal(expectedUserCopyExtended.UInt32, userCopyExtended.UInt32)
-	is.Equal(expectedUserCopyExtended.UInt64, userCopyExtended.UInt64)
-	is.Equal(expectedUserCopyExtended.StringSlice, userCopyExtended.StringSlice)
-	is.Equal(expectedUserCopyExtended.IntSlice, userCopyExtended.IntSlice)
-	is.Equal(expectedUserCopyExtended.IntMethod, userCopyExtended.IntMethod)
-	is.Equal(expectedUserCopyExtended.Int8Method, userCopyExtended.Int8Method)
-	is.Equal(expectedUserCopyExtended.Int16Method, userCopyExtended.Int16Method)
-	is.Equal(expectedUserCopyExtended.Int32Method, userCopyExtended.Int32Method)
-	is.Equal(expectedUserCopyExtended.Int64Method, userCopyExtended.Int64Method)
-	is.Equal(expectedUserCopyExtended.UIntMethod, userCopyExtended.UIntMethod)
-	is.Equal(expectedUserCopyExtended.UInt8Method, userCopyExtended.UInt8Method)
-	is.Equal(expectedUserCopyExtended.UInt16Method, userCopyExtended.UInt16Method)
-	is.Equal(expectedUserCopyExtended.UInt32Method, userCopyExtended.UInt32Method)
-	is.Equal(expectedUserCopyExtended.UInt64Method, userCopyExtended.UInt64Method)
-	is.Equal(expectedUserCopyExtended.MethodWithContext, userCopyExtended.MethodWithContext)
-	is.Equal(expectedUserCopyExtended.SuperMethod, userCopyExtended.SuperMethod)
-	is.Equal(expectedUserCopyExtended.StringSlice, userCopyExtended.StringSlice)
-	is.Equal(expectedUserCopyExtended.IntSlice, userCopyExtended.IntSlice)
+	userCopyExtendedTests := []struct {
+		in  interface{}
+		out interface{}
+	}{
+		{expectedUserCopyExtended.Title, userCopyExtended.Title},
+		{expectedUserCopyExtended.Date, userCopyExtended.Date},
+		{expectedUserCopyExtended.Float32, userCopyExtended.Float32},
+		{expectedUserCopyExtended.Float64, userCopyExtended.Float64},
+		{expectedUserCopyExtended.Int, userCopyExtended.Int},
+		{expectedUserCopyExtended.Int8, userCopyExtended.Int8},
+		{expectedUserCopyExtended.Int16, userCopyExtended.Int16},
+		{expectedUserCopyExtended.Int32, userCopyExtended.Int32},
+		{expectedUserCopyExtended.Int64, userCopyExtended.Int64},
+		{expectedUserCopyExtended.UInt, userCopyExtended.UInt},
+		{expectedUserCopyExtended.UInt8, userCopyExtended.UInt8},
+		{expectedUserCopyExtended.UInt16, userCopyExtended.UInt16},
+		{expectedUserCopyExtended.UInt32, userCopyExtended.UInt32},
+		{expectedUserCopyExtended.UInt64, userCopyExtended.UInt64},
+		{expectedUserCopyExtended.StringSlice, userCopyExtended.StringSlice},
+		{expectedUserCopyExtended.IntSlice, userCopyExtended.IntSlice},
+		{expectedUserCopyExtended.IntMethod, userCopyExtended.IntMethod},
+		{expectedUserCopyExtended.Int8Method, userCopyExtended.Int8Method},
+		{expectedUserCopyExtended.Int16Method, userCopyExtended.Int16Method},
+		{expectedUserCopyExtended.Int32Method, userCopyExtended.Int32Method},
+		{expectedUserCopyExtended.Int64Method, userCopyExtended.Int64Method},
+		{expectedUserCopyExtended.UIntMethod, userCopyExtended.UIntMethod},
+		{expectedUserCopyExtended.UInt8Method, userCopyExtended.UInt8Method},
+		{expectedUserCopyExtended.UInt16Method, userCopyExtended.UInt16Method},
+		{expectedUserCopyExtended.UInt32Method, userCopyExtended.UInt32Method},
+		{expectedUserCopyExtended.UInt64Method, userCopyExtended.UInt64Method},
+		{expectedUserCopyExtended.MethodWithContext, userCopyExtended.MethodWithContext},
+		{expectedUserCopyExtended.SuperMethod, userCopyExtended.SuperMethod},
+		{expectedUserCopyExtended.StringSlice, userCopyExtended.StringSlice},
+		{expectedUserCopyExtended.IntSlice, userCopyExtended.IntSlice},
+	}
+
+	for _, tt := range userCopyExtendedTests {
+		is.Equal(tt.in, tt.out)
+	}
 }
 
 func TestCopyFrom(t *testing.T) {
@@ -100,41 +118,59 @@ func TestCopyFrom(t *testing.T) {
 
 	is.Nil(Copy(user).From(userCopy))
 
-	is.Equal(userExpected.Name, user.Name)
-	is.Equal(userExpected.Date, user.Date)
-	is.Equal(userExpected.AFloat32, user.AFloat32)
-	is.Equal(userExpected.AFloat64, user.AFloat64)
-	is.Equal(userExpected.AnInt, user.AnInt)
-	is.Equal(userExpected.AnInt8, user.AnInt8)
-	is.Equal(userExpected.AnInt16, user.AnInt16)
-	is.Equal(userExpected.AnInt32, user.AnInt32)
-	is.Equal(userExpected.AnInt64, user.AnInt64)
-	is.Equal(userExpected.AnUInt, user.AnUInt)
-	is.Equal(userExpected.AnUInt8, user.AnUInt8)
-	is.Equal(userExpected.AnUInt16, user.AnUInt16)
-	is.Equal(userExpected.AnUInt32, user.AnUInt32)
-	is.Equal(userExpected.AnUInt64, user.AnUInt64)
-	is.Equal(userExpected.AStringSlice, user.AStringSlice)
-	is.Equal(userExpected.AnIntSlice, user.AnIntSlice)
+	userCopyTests := []struct {
+		in  interface{}
+		out interface{}
+	}{
+		{userExpected.Name, user.Name},
+		{userExpected.Date, user.Date},
+		{userExpected.AFloat32, user.AFloat32},
+		{userExpected.AFloat64, user.AFloat64},
+		{userExpected.AnInt, user.AnInt},
+		{userExpected.AnInt8, user.AnInt8},
+		{userExpected.AnInt16, user.AnInt16},
+		{userExpected.AnInt32, user.AnInt32},
+		{userExpected.AnInt64, user.AnInt64},
+		{userExpected.AnUInt, user.AnUInt},
+		{userExpected.AnUInt8, user.AnUInt8},
+		{userExpected.AnUInt16, user.AnUInt16},
+		{userExpected.AnUInt32, user.AnUInt32},
+		{userExpected.AnUInt64, user.AnUInt64},
+		{userExpected.AStringSlice, user.AStringSlice},
+		{userExpected.AnIntSlice, user.AnIntSlice},
+	}
+
+	for _, tt := range userCopyTests {
+		is.Equal(tt.in, tt.out)
+	}
 
 	is.Nil(Copy(user).From(userCopyExtended))
 
-	is.Equal(userExpected.Name, user.Name)
-	is.Equal(userExpected.Date, user.Date)
-	is.Equal(userExpected.AFloat32, user.AFloat32)
-	is.Equal(userExpected.AFloat64, user.AFloat64)
-	is.Equal(userExpected.AnInt, user.AnInt)
-	is.Equal(userExpected.AnInt8, user.AnInt8)
-	is.Equal(userExpected.AnInt16, user.AnInt16)
-	is.Equal(userExpected.AnInt32, user.AnInt32)
-	is.Equal(userExpected.AnInt64, user.AnInt64)
-	is.Equal(userExpected.AnUInt, user.AnUInt)
-	is.Equal(userExpected.AnUInt8, user.AnUInt8)
-	is.Equal(userExpected.AnUInt16, user.AnUInt16)
-	is.Equal(userExpected.AnUInt32, user.AnUInt32)
-	is.Equal(userExpected.AnUInt64, user.AnUInt64)
-	is.Equal(userExpected.AStringSlice, user.AStringSlice)
-	is.Equal(userExpected.AnIntSlice, user.AnIntSlice)
+	userCopyExtendedTests := []struct {
+		in  interface{}
+		out interface{}
+	}{
+		{userExpected.Name, user.Name},
+		{userExpected.Date, user.Date},
+		{userExpected.AFloat32, user.AFloat32},
+		{userExpected.AFloat64, user.AFloat64},
+		{userExpected.AnInt, user.AnInt},
+		{userExpected.AnInt8, user.AnInt8},
+		{userExpected.AnInt16, user.AnInt16},
+		{userExpected.AnInt32, user.AnInt32},
+		{userExpected.AnInt64, user.AnInt64},
+		{userExpected.AnUInt, user.AnUInt},
+		{userExpected.AnUInt8, user.AnUInt8},
+		{userExpected.AnUInt16, user.AnUInt16},
+		{userExpected.AnUInt32, user.AnUInt32},
+		{userExpected.AnUInt64, user.AnUInt64},
+		{userExpected.AStringSlice, user.AStringSlice},
+		{userExpected.AnIntSlice, user.AnIntSlice},
+	}
+
+	for _, tt := range userCopyExtendedTests {
+		is.Equal(tt.in, tt.out)
+	}
 }
 
 // -----------------------------------------------------------------------------
