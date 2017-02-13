@@ -2,7 +2,6 @@ package deepcopier
 
 import (
 	"fmt"
-	"reflect"
 	"testing"
 	"time"
 
@@ -10,105 +9,104 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// TestCopyTo tests Copy(src).To(dst) method.
 func TestCopyTo(t *testing.T) {
 	var (
-		is                       = assert.New(t)
 		now                      = time.Now()
 		user                     = NewUser(now)
 		userCopy                 = &UserCopy{}
-		userCopyExtended         = &UserCopyExtended{}
 		expectedUserCopy         = NewUserCopy(now)
+		userCopyExtended         = &UserCopyExtended{}
 		expectedUserCopyExtended = NewUserCopyExtended(now)
 	)
 
-	is.Nil(Copy(user).WithContext(map[string]interface{}{"version": "1"}).To(userCopy))
+	assert.Nil(t, Copy(user).WithContext(map[string]interface{}{"version": "1"}).To(userCopy))
 
 	userCopyTests := []struct {
 		in  interface{}
 		out interface{}
 	}{
-		{expectedUserCopy.Title, userCopy.Title},
-		{expectedUserCopy.Date, userCopy.Date},
-		{expectedUserCopy.Float32, userCopy.Float32},
-		{expectedUserCopy.Float64, userCopy.Float64},
-		{expectedUserCopy.Int, userCopy.Int},
-		{expectedUserCopy.Int8, userCopy.Int8},
-		{expectedUserCopy.Int16, userCopy.Int16},
-		{expectedUserCopy.Int32, userCopy.Int32},
-		{expectedUserCopy.Int64, userCopy.Int64},
-		{expectedUserCopy.UInt, userCopy.UInt},
-		{expectedUserCopy.UInt8, userCopy.UInt8},
-		{expectedUserCopy.UInt16, userCopy.UInt16},
-		{expectedUserCopy.UInt32, userCopy.UInt32},
-		{expectedUserCopy.UInt64, userCopy.UInt64},
-		{expectedUserCopy.StringSlice, userCopy.StringSlice},
-		{expectedUserCopy.IntSlice, userCopy.IntSlice},
-		{expectedUserCopy.IntMethod, userCopy.IntMethod},
-		{expectedUserCopy.Int8Method, userCopy.Int8Method},
-		{expectedUserCopy.Int16Method, userCopy.Int16Method},
-		{expectedUserCopy.Int32Method, userCopy.Int32Method},
-		{expectedUserCopy.Int64Method, userCopy.Int64Method},
-		{expectedUserCopy.UIntMethod, userCopy.UIntMethod},
-		{expectedUserCopy.UInt8Method, userCopy.UInt8Method},
-		{expectedUserCopy.UInt16Method, userCopy.UInt16Method},
-		{expectedUserCopy.UInt32Method, userCopy.UInt32Method},
-		{expectedUserCopy.UInt64Method, userCopy.UInt64Method},
-		{expectedUserCopy.MethodWithContext, userCopy.MethodWithContext},
-		{expectedUserCopy.SuperMethod, userCopy.SuperMethod},
-		{expectedUserCopy.StringSlice, userCopy.StringSlice},
-		{expectedUserCopy.IntSlice, userCopy.IntSlice},
+		1:  {expectedUserCopy.Title, userCopy.Title},
+		2:  {expectedUserCopy.Date, userCopy.Date},
+		3:  {expectedUserCopy.Float32, userCopy.Float32},
+		4:  {expectedUserCopy.Float64, userCopy.Float64},
+		5:  {expectedUserCopy.Int, userCopy.Int},
+		6:  {expectedUserCopy.Int8, userCopy.Int8},
+		7:  {expectedUserCopy.Int16, userCopy.Int16},
+		8:  {expectedUserCopy.Int32, userCopy.Int32},
+		9:  {expectedUserCopy.Int64, userCopy.Int64},
+		10: {expectedUserCopy.UInt, userCopy.UInt},
+		11: {expectedUserCopy.UInt8, userCopy.UInt8},
+		12: {expectedUserCopy.UInt16, userCopy.UInt16},
+		13: {expectedUserCopy.UInt32, userCopy.UInt32},
+		14: {expectedUserCopy.UInt64, userCopy.UInt64},
+		15: {expectedUserCopy.StringSlice, userCopy.StringSlice},
+		16: {expectedUserCopy.IntSlice, userCopy.IntSlice},
+		17: {expectedUserCopy.IntMethod, userCopy.IntMethod},
+		18: {expectedUserCopy.Int8Method, userCopy.Int8Method},
+		19: {expectedUserCopy.Int16Method, userCopy.Int16Method},
+		20: {expectedUserCopy.Int32Method, userCopy.Int32Method},
+		21: {expectedUserCopy.Int64Method, userCopy.Int64Method},
+		22: {expectedUserCopy.UIntMethod, userCopy.UIntMethod},
+		23: {expectedUserCopy.UInt8Method, userCopy.UInt8Method},
+		24: {expectedUserCopy.UInt16Method, userCopy.UInt16Method},
+		25: {expectedUserCopy.UInt32Method, userCopy.UInt32Method},
+		26: {expectedUserCopy.UInt64Method, userCopy.UInt64Method},
+		27: {expectedUserCopy.MethodWithContext, userCopy.MethodWithContext},
+		28: {expectedUserCopy.SuperMethod, userCopy.SuperMethod},
+		29: {expectedUserCopy.StringSlice, userCopy.StringSlice},
+		30: {expectedUserCopy.IntSlice, userCopy.IntSlice},
 	}
 
-	for _, tt := range userCopyTests {
-		is.Equal(tt.in, tt.out)
+	for i, tt := range userCopyTests {
+		assertEqual(t, i, tt.in, tt.out)
 	}
 
-	is.Nil(Copy(user).WithContext(map[string]interface{}{"version": "1"}).To(userCopyExtended))
+	assert.Nil(t, Copy(user).WithContext(map[string]interface{}{"version": "1"}).To(userCopyExtended))
 
 	userCopyExtendedTests := []struct {
 		in  interface{}
 		out interface{}
 	}{
-		{expectedUserCopyExtended.Title, userCopyExtended.Title},
-		{expectedUserCopyExtended.Date, userCopyExtended.Date},
-		{expectedUserCopyExtended.Float32, userCopyExtended.Float32},
-		{expectedUserCopyExtended.Float64, userCopyExtended.Float64},
-		{expectedUserCopyExtended.Int, userCopyExtended.Int},
-		{expectedUserCopyExtended.Int8, userCopyExtended.Int8},
-		{expectedUserCopyExtended.Int16, userCopyExtended.Int16},
-		{expectedUserCopyExtended.Int32, userCopyExtended.Int32},
-		{expectedUserCopyExtended.Int64, userCopyExtended.Int64},
-		{expectedUserCopyExtended.UInt, userCopyExtended.UInt},
-		{expectedUserCopyExtended.UInt8, userCopyExtended.UInt8},
-		{expectedUserCopyExtended.UInt16, userCopyExtended.UInt16},
-		{expectedUserCopyExtended.UInt32, userCopyExtended.UInt32},
-		{expectedUserCopyExtended.UInt64, userCopyExtended.UInt64},
-		{expectedUserCopyExtended.StringSlice, userCopyExtended.StringSlice},
-		{expectedUserCopyExtended.IntSlice, userCopyExtended.IntSlice},
-		{expectedUserCopyExtended.IntMethod, userCopyExtended.IntMethod},
-		{expectedUserCopyExtended.Int8Method, userCopyExtended.Int8Method},
-		{expectedUserCopyExtended.Int16Method, userCopyExtended.Int16Method},
-		{expectedUserCopyExtended.Int32Method, userCopyExtended.Int32Method},
-		{expectedUserCopyExtended.Int64Method, userCopyExtended.Int64Method},
-		{expectedUserCopyExtended.UIntMethod, userCopyExtended.UIntMethod},
-		{expectedUserCopyExtended.UInt8Method, userCopyExtended.UInt8Method},
-		{expectedUserCopyExtended.UInt16Method, userCopyExtended.UInt16Method},
-		{expectedUserCopyExtended.UInt32Method, userCopyExtended.UInt32Method},
-		{expectedUserCopyExtended.UInt64Method, userCopyExtended.UInt64Method},
-		{expectedUserCopyExtended.MethodWithContext, userCopyExtended.MethodWithContext},
-		{expectedUserCopyExtended.SuperMethod, userCopyExtended.SuperMethod},
-		{expectedUserCopyExtended.StringSlice, userCopyExtended.StringSlice},
-		{expectedUserCopyExtended.IntSlice, userCopyExtended.IntSlice},
+		1:  {expectedUserCopyExtended.Title, userCopyExtended.Title},
+		2:  {expectedUserCopyExtended.Date, userCopyExtended.Date},
+		3:  {expectedUserCopyExtended.Float32, userCopyExtended.Float32},
+		4:  {expectedUserCopyExtended.Float64, userCopyExtended.Float64},
+		5:  {expectedUserCopyExtended.Int, userCopyExtended.Int},
+		6:  {expectedUserCopyExtended.Int8, userCopyExtended.Int8},
+		7:  {expectedUserCopyExtended.Int16, userCopyExtended.Int16},
+		8:  {expectedUserCopyExtended.Int32, userCopyExtended.Int32},
+		9:  {expectedUserCopyExtended.Int64, userCopyExtended.Int64},
+		10: {expectedUserCopyExtended.UInt, userCopyExtended.UInt},
+		11: {expectedUserCopyExtended.UInt8, userCopyExtended.UInt8},
+		12: {expectedUserCopyExtended.UInt16, userCopyExtended.UInt16},
+		13: {expectedUserCopyExtended.UInt32, userCopyExtended.UInt32},
+		14: {expectedUserCopyExtended.UInt64, userCopyExtended.UInt64},
+		15: {expectedUserCopyExtended.StringSlice, userCopyExtended.StringSlice},
+		16: {expectedUserCopyExtended.IntSlice, userCopyExtended.IntSlice},
+		17: {expectedUserCopyExtended.IntMethod, userCopyExtended.IntMethod},
+		18: {expectedUserCopyExtended.Int8Method, userCopyExtended.Int8Method},
+		19: {expectedUserCopyExtended.Int16Method, userCopyExtended.Int16Method},
+		20: {expectedUserCopyExtended.Int32Method, userCopyExtended.Int32Method},
+		21: {expectedUserCopyExtended.Int64Method, userCopyExtended.Int64Method},
+		22: {expectedUserCopyExtended.UIntMethod, userCopyExtended.UIntMethod},
+		23: {expectedUserCopyExtended.UInt8Method, userCopyExtended.UInt8Method},
+		24: {expectedUserCopyExtended.UInt16Method, userCopyExtended.UInt16Method},
+		25: {expectedUserCopyExtended.UInt32Method, userCopyExtended.UInt32Method},
+		26: {expectedUserCopyExtended.UInt64Method, userCopyExtended.UInt64Method},
+		27: {expectedUserCopyExtended.MethodWithContext, userCopyExtended.MethodWithContext},
+		28: {expectedUserCopyExtended.SuperMethod, userCopyExtended.SuperMethod},
+		29: {expectedUserCopyExtended.StringSlice, userCopyExtended.StringSlice},
+		30: {expectedUserCopyExtended.IntSlice, userCopyExtended.IntSlice},
 	}
 
-	for _, tt := range userCopyExtendedTests {
-		is.Equal(tt.in, tt.out)
+	for i, tt := range userCopyExtendedTests {
+		assertEqual(t, i, tt.in, tt.out)
 	}
 }
 
 func TestCopyFrom(t *testing.T) {
 	var (
-		is               = assert.New(t)
 		now              = time.Now()
 		user             = &User{}
 		userExpected     = NewUser(now)
@@ -116,60 +114,60 @@ func TestCopyFrom(t *testing.T) {
 		userCopyExtended = NewUserCopyExtended(now)
 	)
 
-	is.Nil(Copy(user).From(userCopy))
+	assert.Nil(t, Copy(user).From(userCopy))
 
 	userCopyTests := []struct {
 		in  interface{}
 		out interface{}
 	}{
-		{userExpected.Name, user.Name},
-		{userExpected.Date, user.Date},
-		{userExpected.AFloat32, user.AFloat32},
-		{userExpected.AFloat64, user.AFloat64},
-		{userExpected.AnInt, user.AnInt},
-		{userExpected.AnInt8, user.AnInt8},
-		{userExpected.AnInt16, user.AnInt16},
-		{userExpected.AnInt32, user.AnInt32},
-		{userExpected.AnInt64, user.AnInt64},
-		{userExpected.AnUInt, user.AnUInt},
-		{userExpected.AnUInt8, user.AnUInt8},
-		{userExpected.AnUInt16, user.AnUInt16},
-		{userExpected.AnUInt32, user.AnUInt32},
-		{userExpected.AnUInt64, user.AnUInt64},
-		{userExpected.AStringSlice, user.AStringSlice},
-		{userExpected.AnIntSlice, user.AnIntSlice},
+		1:  {userExpected.Name, user.Name},
+		2:  {userExpected.Date, user.Date},
+		3:  {userExpected.AFloat32, user.AFloat32},
+		4:  {userExpected.AFloat64, user.AFloat64},
+		5:  {userExpected.AnInt, user.AnInt},
+		6:  {userExpected.AnInt8, user.AnInt8},
+		7:  {userExpected.AnInt16, user.AnInt16},
+		8:  {userExpected.AnInt32, user.AnInt32},
+		9:  {userExpected.AnInt64, user.AnInt64},
+		10: {userExpected.AnUInt, user.AnUInt},
+		11: {userExpected.AnUInt8, user.AnUInt8},
+		12: {userExpected.AnUInt16, user.AnUInt16},
+		13: {userExpected.AnUInt32, user.AnUInt32},
+		14: {userExpected.AnUInt64, user.AnUInt64},
+		15: {userExpected.AStringSlice, user.AStringSlice},
+		16: {userExpected.AnIntSlice, user.AnIntSlice},
 	}
 
-	for _, tt := range userCopyTests {
-		is.Equal(tt.in, tt.out)
+	for i, tt := range userCopyTests {
+		assertEqual(t, i, tt.in, tt.out)
 	}
 
-	is.Nil(Copy(user).From(userCopyExtended))
+	assert.Nil(t, Copy(user).From(userCopyExtended))
 
 	userCopyExtendedTests := []struct {
 		in  interface{}
 		out interface{}
 	}{
-		{userExpected.Name, user.Name},
-		{userExpected.Date, user.Date},
-		{userExpected.AFloat32, user.AFloat32},
-		{userExpected.AFloat64, user.AFloat64},
-		{userExpected.AnInt, user.AnInt},
-		{userExpected.AnInt8, user.AnInt8},
-		{userExpected.AnInt16, user.AnInt16},
-		{userExpected.AnInt32, user.AnInt32},
-		{userExpected.AnInt64, user.AnInt64},
-		{userExpected.AnUInt, user.AnUInt},
-		{userExpected.AnUInt8, user.AnUInt8},
-		{userExpected.AnUInt16, user.AnUInt16},
-		{userExpected.AnUInt32, user.AnUInt32},
-		{userExpected.AnUInt64, user.AnUInt64},
-		{userExpected.AStringSlice, user.AStringSlice},
-		{userExpected.AnIntSlice, user.AnIntSlice},
+		1:  {userExpected.Name, user.Name},
+		2:  {userExpected.Date, user.Date},
+		3:  {userExpected.AFloat32, user.AFloat32},
+		4:  {userExpected.AFloat64, user.AFloat64},
+		5:  {userExpected.AnInt, user.AnInt},
+		6:  {userExpected.AnInt8, user.AnInt8},
+		7:  {userExpected.AnInt16, user.AnInt16},
+		8:  {userExpected.AnInt32, user.AnInt32},
+		9:  {userExpected.AnInt64, user.AnInt64},
+		10: {userExpected.AnUInt, user.AnUInt},
+		11: {userExpected.AnUInt8, user.AnUInt8},
+		12: {userExpected.AnUInt16, user.AnUInt16},
+		13: {userExpected.AnUInt32, user.AnUInt32},
+		14: {userExpected.AnUInt64, user.AnUInt64},
+		15: {userExpected.AStringSlice, user.AStringSlice},
+		16: {userExpected.AnIntSlice, user.AnIntSlice},
 	}
 
-	for _, tt := range userCopyExtendedTests {
-		is.Equal(tt.in, tt.out)
+	for i, tt := range userCopyExtendedTests {
+		assertEqual(t, i, tt.in, tt.out)
 	}
 }
 
@@ -415,75 +413,75 @@ type T2 struct {
 	R2PtrToValue      R2
 }
 
-func TestCopier(t *testing.T) {
-	var (
-		strPtr        = "ptr"
-		strPtrToValue = "ptrToValue"
-		now           = time.Now()
-		sliceStr      = []string{"Chuck", "Norris"}
-		sliceInt      = []int{0, 8, 15}
-		nullStr       = null.StringFrom("I'm null")
-		mapInterfaces = map[string]interface{}{"message": "ok", "valid": true}
-		methodContext = map[string]interface{}{"url": "https://ulule.com"}
-	)
+// func TestCopier(t *testing.T) {
+// 	var (
+// 		strPtr        = "ptr"
+// 		strPtrToValue = "ptrToValue"
+// 		now           = time.Now()
+// 		sliceStr      = []string{"Chuck", "Norris"}
+// 		sliceInt      = []int{0, 8, 15}
+// 		nullStr       = null.StringFrom("I'm null")
+// 		mapInterfaces = map[string]interface{}{"message": "ok", "valid": true}
+// 		methodContext = map[string]interface{}{"url": "https://ulule.com"}
+// 	)
 
-	r1 := &R1{String: "r1 string"}
+// 	r1 := &R1{String: "r1 string"}
 
-	t1 := &T1{
-		Int64:            1,
-		String:           "hello",
-		StringPtr:        &strPtr,
-		StringPtrToValue: &strPtrToValue,
-		Time:             now,
-		TimePtr:          &now,
-		TimePtrToValue:   &now,
-		SliceString:      sliceStr,
-		SliceInt:         sliceInt,
-		NullString:       nullStr,
-		Map:              mapInterfaces,
-		R1:               *r1,
-		R1Ptr:            r1,
-		R1PtrToValue:     r1,
-	}
+// 	t1 := &T1{
+// 		Int64:            1,
+// 		String:           "hello",
+// 		StringPtr:        &strPtr,
+// 		StringPtrToValue: &strPtrToValue,
+// 		Time:             now,
+// 		TimePtr:          &now,
+// 		TimePtrToValue:   &now,
+// 		SliceString:      sliceStr,
+// 		SliceInt:         sliceInt,
+// 		NullString:       nullStr,
+// 		Map:              mapInterfaces,
+// 		R1:               *r1,
+// 		R1Ptr:            r1,
+// 		R1PtrToValue:     r1,
+// 	}
 
-	t2 := &T2{}
+// 	t2 := &T2{}
 
-	options := Options{
-		Context: methodContext,
-	}
+// 	options := Options{
+// 		Context: methodContext,
+// 	}
 
-	assert.Nil(t, Copier(t2, t1, options))
+// 	assert.Nil(t, cp(t2, t1, options))
 
-	table := []struct {
-		in  interface{}
-		out interface{}
-	}{
-		{t1.Int64, t2.Int64},
-		{t1.Int64, t2.Int64Renamed},
-		{t1.String, t2.String},
-		{t1.StringPtr, t2.StringPtr},
-		{strPtrToValue, t2.StringPtrToValue},
-		{t1.Time, t2.Time},
-		{t1.TimePtr, t2.TimePtr},
-		{*t1.TimePtrToValue, t2.TimePtrToValue},
-		{t1.SliceString, t2.SliceString},
-		{t1.SliceInt, t2.SliceInt},
-		{t1.Map, t2.Map},
-		{t1.NullString, t2.NullString},
-		{t1.MethodString(), t2.MethodString},
-		{t1.AnotherMethodString(), t2.MString},
-		{t1.MethodWithContext(methodContext), t2.MethodWithContext},
-		{t1.R1, t2.R1},
-		{t1.R1Ptr, t2.R1Ptr},
-		{*r1, t2.R1PtrToValue},
-	}
+// 	table := []struct {
+// 		in  interface{}
+// 		out interface{}
+// 	}{
+// 		{t1.Int64, t2.Int64},
+// 		{t1.Int64, t2.Int64Renamed},
+// 		{t1.String, t2.String},
+// 		{t1.StringPtr, t2.StringPtr},
+// 		{strPtrToValue, t2.StringPtrToValue},
+// 		{t1.Time, t2.Time},
+// 		{t1.TimePtr, t2.TimePtr},
+// 		{*t1.TimePtrToValue, t2.TimePtrToValue},
+// 		{t1.SliceString, t2.SliceString},
+// 		{t1.SliceInt, t2.SliceInt},
+// 		{t1.Map, t2.Map},
+// 		{t1.NullString, t2.NullString},
+// 		{t1.MethodString(), t2.MethodString},
+// 		{t1.AnotherMethodString(), t2.MString},
+// 		{t1.MethodWithContext(methodContext), t2.MethodWithContext},
+// 		{t1.R1, t2.R1},
+// 		{t1.R1Ptr, t2.R1Ptr},
+// 		{*r1, t2.R1PtrToValue},
+// 	}
 
-	for _, tt := range table {
-		assert.Equal(t, tt.in, tt.out,
-			fmt.Sprintf("%v (%v) not equal to %v (%v)",
-				tt.in,
-				reflect.TypeOf(tt.in),
-				tt.out,
-				reflect.TypeOf(tt.out)))
-	}
+// 	for i, tt := range table {
+// 		assertEqual(t, i, tt.in, tt.out)
+// 	}
+// }
+
+// assertEqual is a verbose version of assert.Equal()
+func assertEqual(t *testing.T, idx int, in interface{}, out interface{}) {
+	assert.Equal(t, in, out, fmt.Sprintf("%d -- %v not equal to %v", idx, in, out))
 }
