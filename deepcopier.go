@@ -271,8 +271,18 @@ func getFieldNames(instance interface{}) []string {
 		return nil
 	}
 
-	for i := 0; i < t.NumField(); i++ {
-		fields = append(fields, t.Field(i).Name)
+	for i := 0; i < v.NumField(); i++ {
+		var (
+			vField = v.Field(i)
+			tField = v.Type().Field(i)
+		)
+
+		if tField.Type.Kind() == reflect.Struct && tField.Anonymous {
+			fields = append(fields, getFieldNames(vField.Interface())...)
+			continue
+		}
+
+		fields = append(fields, tField.Name)
 	}
 
 	return fields
