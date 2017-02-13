@@ -1,14 +1,13 @@
 package deepcopier
 
 import (
-	"errors"
 	"fmt"
 	"reflect"
 	"strings"
 )
 
 const (
-	// TagName is struct field tag name.
+	// TagName is the deepcopier struct tag name.
 	TagName = "deepcopier"
 	// FieldOptionName is the from field option name for struct tag.
 	FieldOptionName = "field"
@@ -18,16 +17,18 @@ const (
 	SkipOptionName = "skip"
 )
 
-// TagOptions are struct tag options.
-type TagOptions map[string]string
+type (
+	// TagOptions is a map that contains extracted struct tag options.
+	TagOptions map[string]string
 
-// Options are copier options.
-type Options struct {
-	// Context given to WithContext() method.
-	Context map[string]interface{}
-	// Reversed reverses struct tag checkings.
-	Reversed bool
-}
+	// Options are copier options.
+	Options struct {
+		// Context given to WithContext() method.
+		Context map[string]interface{}
+		// Reversed reverses struct tag checkings.
+		Reversed bool
+	}
+)
 
 // DeepCopier deep copies a struct to/from a struct.
 type DeepCopier struct {
@@ -47,22 +48,17 @@ func (dc *DeepCopier) WithContext(ctx map[string]interface{}) *DeepCopier {
 	return dc
 }
 
-// To sets the given the destination.
+// To sets the destination.
 func (dc *DeepCopier) To(dst interface{}) error {
 	dc.dst = dst
-	return cp(dc.dst, dc.src, Options{
-		Context: dc.ctx,
-	})
+	return cp(dc.dst, dc.src, Options{Context: dc.ctx})
 }
 
 // From sets the given the source as destination and destination as source.
 func (dc *DeepCopier) From(src interface{}) error {
 	dc.dst = dc.src
 	dc.src = src
-	return cp(dc.dst, dc.src, Options{
-		Context:  dc.ctx,
-		Reversed: true,
-	})
+	return cp(dc.dst, dc.src, Options{Context: dc.ctx, Reversed: true})
 }
 
 // cp is the brand new way to process copy.
@@ -80,7 +76,7 @@ func cp(dst interface{}, src interface{}, args ...Options) error {
 	}
 
 	if !dstValue.CanAddr() {
-		return errors.New("dst value is unaddressable")
+		return fmt.Errorf("destination %+v is unaddressable", dstValue.Interface())
 	}
 
 	for _, m := range srcMethodNames {
@@ -97,14 +93,14 @@ func cp(dst interface{}, src interface{}, args ...Options) error {
 		var (
 			dstFieldType, _ = dstValue.Type().FieldByName(name)
 			dstFieldValue   = dstValue.FieldByName(name)
-			withContext     = false
 		)
 
+		withContext := false
 		if _, ok := opts[ContextOptionName]; ok {
 			withContext = true
 		}
 
-		var args []reflect.Value
+		args := []reflect.Value{}
 		if withContext {
 			args = []reflect.Value{reflect.ValueOf(options.Context)}
 		}
@@ -117,11 +113,11 @@ func cp(dst interface{}, src interface{}, args ...Options) error {
 
 	for _, f := range srcFieldNames {
 		var (
-			srcFieldValue                = srcValue.FieldByName(f)
-			srcFieldType, srcFieldTypeOK = srcValue.Type().FieldByName(f)
-			srcFieldName                 = srcFieldType.Name
-			dstFieldName                 = srcFieldName
-			tagOptions                   TagOptions
+			srcFieldValue               = srcValue.FieldByName(f)
+			srcFieldType, srcFieldFound = srcValue.Type().FieldByName(f)
+			srcFieldName                = srcFieldType.Name
+			dstFieldName                = srcFieldName
+			tagOptions                  TagOptions
 		)
 
 		if options.Reversed {
@@ -140,8 +136,8 @@ func cp(dst interface{}, src interface{}, args ...Options) error {
 		}
 
 		var (
-			dstFieldType, dstFieldTypeOK = dstValue.Type().FieldByName(dstFieldName)
-			dstFieldValue                = dstValue.FieldByName(dstFieldName)
+			dstFieldType, dstFieldFound = dstValue.Type().FieldByName(dstFieldName)
+			dstFieldValue               = dstValue.FieldByName(dstFieldName)
 		)
 
 		// Ptr -> Value
@@ -150,7 +146,7 @@ func cp(dst interface{}, src interface{}, args ...Options) error {
 			continue
 		}
 
-		if srcFieldTypeOK && dstFieldTypeOK && srcFieldType.Type.AssignableTo(dstFieldType.Type) {
+		if srcFieldFound && dstFieldFound && srcFieldType.Type.AssignableTo(dstFieldType.Type) {
 			dstFieldValue.Set(srcFieldValue)
 		}
 	}
@@ -167,16 +163,12 @@ func getTagOptions(value string) TagOptions {
 
 		// deepcopier:"keyword; without; value;"
 		if len(o) == 1 {
-			k := o[0]
-			options[k] = ""
+			options[o[0]] = ""
 		}
 
 		// deepcopier:"key:value; anotherkey:anothervalue"
 		if len(o) == 2 {
-			k, v := o[0], o[1]
-			k = strings.TrimSpace(k)
-			v = strings.TrimSpace(v)
-			options[k] = v
+			options[strings.TrimSpace(o[0])] = strings.TrimSpace(o[1])
 		}
 	}
 
@@ -193,23 +185,23 @@ func getRelatedField(instance interface{}, name string) (string, TagOptions) {
 
 	for i := 0; i < value.NumField(); i++ {
 		var (
-			v          = value.Field(i)
-			t          = value.Type().Field(i)
-			tagOptions = getTagOptions(t.Tag.Get(TagName))
+			vField     = value.Field(i)
+			tField     = value.Type().Field(i)
+			tagOptions = getTagOptions(tField.Tag.Get(TagName))
 		)
 
-		if t.Type.Kind() == reflect.Struct && t.Anonymous {
-			if n, o := getRelatedField(v.Interface(), name); n != "" {
+		if tField.Type.Kind() == reflect.Struct && tField.Anonymous {
+			if n, o := getRelatedField(vField.Interface(), name); n != "" {
 				return n, o
 			}
 		}
 
 		if v, ok := tagOptions[FieldOptionName]; ok && v == name {
-			return t.Name, tagOptions
+			return tField.Name, tagOptions
 		}
 
-		if t.Name == name {
-			return t.Name, tagOptions
+		if tField.Name == name {
+			return tField.Name, tagOptions
 		}
 	}
 
@@ -218,11 +210,9 @@ func getRelatedField(instance interface{}, name string) (string, TagOptions) {
 
 // getMethodNames returns instance's method names.
 func getMethodNames(instance interface{}) []string {
-	var (
-		t       = reflect.TypeOf(instance)
-		methods []string
-	)
+	var methods []string
 
+	t := reflect.TypeOf(instance)
 	for i := 0; i < t.NumMethod(); i++ {
 		methods = append(methods, t.Method(i).Name)
 	}
@@ -233,9 +223,9 @@ func getMethodNames(instance interface{}) []string {
 // getFieldNames returns instance's field names.
 func getFieldNames(instance interface{}) []string {
 	var (
+		fields []string
 		v      = reflect.Indirect(reflect.ValueOf(instance))
 		t      = v.Type()
-		fields []string
 	)
 
 	if t.Kind() != reflect.Struct {
