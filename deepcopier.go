@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"reflect"
-	"strings"
 	"time"
 
 	"github.com/guregu/null"
@@ -15,13 +14,10 @@ import (
 const (
 	// TagName is struct field tag name.
 	TagName = "deepcopier"
-
 	// FieldOptionName is the from field option name for struct tag.
 	FieldOptionName = "field"
-
 	// ContextOptionName is the context option name for struct tag.
 	ContextOptionName = "context"
-
 	// SkipOptionName is the skip option name for struct tag.
 	SkipOptionName = "skip"
 )
@@ -141,42 +137,10 @@ func (dc *DeepCopier) ProcessCopy() error {
 	return nil
 }
 
-// -----------------------------------------------------------------------------
-// Options
-// -----------------------------------------------------------------------------
-
 // WithContext injects the given context into the builder instance.
 func (dc *DeepCopier) WithContext(context map[string]interface{}) *DeepCopier {
 	dc.Context = context
 	return dc
-}
-
-// -----------------------------------------------------------------------------
-// Struct tags
-// -----------------------------------------------------------------------------
-
-// GetTagOptions parses deepcopier tag field and returns options.
-func GetTagOptions(value string) map[string]string {
-	options := map[string]string{}
-
-	for _, opt := range strings.Split(value, ";") {
-		o := strings.Split(opt, ":")
-
-		// deepcopier:"keyword; without; value;"
-		if len(o) == 1 {
-			k := o[0]
-			options[k] = ""
-		}
-
-		// deepcopier:"key:value; anotherkey:anothervalue"
-		if len(o) == 2 {
-			k, v := o[0], o[1]
-			k = strings.TrimSpace(k)
-			v = strings.TrimSpace(v)
-			options[k] = v
-		}
-	}
-	return options
 }
 
 // -----------------------------------------------------------------------------
@@ -422,31 +386,13 @@ type Options struct {
 	Context map[string]interface{}
 }
 
-func getMethods(t reflect.Type) []string {
-	var methods []string
-	for i := 0; i < t.NumMethod(); i++ {
-		methods = append(methods, t.Method(i).Name)
-	}
-	return methods
-}
-
-// InStringSlice checks if the given string is in the given slice of string
-func InStringSlice(haystack []string, needle string) bool {
-	for _, str := range haystack {
-		if needle == str {
-			return true
-		}
-	}
-	return false
-}
-
 // Copier is the brand new way to process copy.
 func Copier(dst interface{}, src interface{}, args ...Options) error {
 	var (
 		options    = Options{}
 		srcValue   = reflect.Indirect(reflect.ValueOf(src))
 		srcType    = srcValue.Type()
-		srcMethods = getMethods(srcType)
+		srcMethods = GetTypeMethods(srcType)
 		dstValue   = reflect.Indirect(reflect.ValueOf(dst))
 	)
 
