@@ -10,16 +10,16 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func ATestCopyTo(t *testing.T) {
-	is := assert.New(t)
-	now := time.Now()
-	pointer := "pointer"
-
-	user := NewUser(now, &pointer)
-	userCopy := &UserCopy{}
-	userCopyExtended := &UserCopyExtended{}
-	expectedUserCopy := NewUserCopy(now, &pointer)
-	expectedUserCopyExtended := NewUserCopyExtended(now, &pointer)
+func TestCopyTo(t *testing.T) {
+	var (
+		is                       = assert.New(t)
+		now                      = time.Now()
+		user                     = NewUser(now)
+		userCopy                 = &UserCopy{}
+		userCopyExtended         = &UserCopyExtended{}
+		expectedUserCopy         = NewUserCopy(now)
+		expectedUserCopyExtended = NewUserCopyExtended(now)
+	)
 
 	is.Nil(Copy(user).WithContext(map[string]interface{}{"version": "1"}).To(userCopy))
 
@@ -89,14 +89,14 @@ func ATestCopyTo(t *testing.T) {
 }
 
 func TestCopyFrom(t *testing.T) {
-	is := assert.New(t)
-	now := time.Now()
-	pointer := "pointer"
-
-	user := &User{}
-	userExpected := NewUser(now, &pointer)
-	userCopy := NewUserCopy(now, &pointer)
-	userCopyExtended := NewUserCopyExtended(now, &pointer)
+	var (
+		is               = assert.New(t)
+		now              = time.Now()
+		user             = &User{}
+		userExpected     = NewUser(now)
+		userCopy         = NewUserCopy(now)
+		userCopyExtended = NewUserCopyExtended(now)
+	)
 
 	is.Nil(Copy(user).From(userCopy))
 
@@ -162,7 +162,7 @@ type User struct {
 	APointer     string
 }
 
-func NewUser(now time.Time, pointer *string) *User {
+func NewUser(now time.Time) *User {
 	return &User{
 		Name:         "Chuck Norris",
 		Date:         now,
@@ -181,7 +181,6 @@ func NewUser(now time.Time, pointer *string) *User {
 		AStringSlice: []string{"Chuck", "Norris"},
 		AnIntSlice:   []int{0, 8, 15},
 		ANullString:  null.StringFrom("I'm null"),
-		APointer:     *pointer,
 	}
 }
 
@@ -271,14 +270,13 @@ type UserCopy struct {
 	UInt64Method      uint64      `json:"uint64_method"`
 	MethodWithContext string      `json:"method_with_context" deepcopier:"context"`
 	SuperMethod       string      `json:"super_method" deepcopier:"field:MethodWithDifferentName"`
-	PointerString     *string     `json:"a_pointer_string" deepcopier:"field:APointer"`
 }
 
 type UserCopyExtended struct {
 	UserCopy
 }
 
-func NewUserCopy(now time.Time, pointer *string) *UserCopy {
+func NewUserCopy(now time.Time) *UserCopy {
 	return &UserCopy{
 		Title:             "Chuck Norris",
 		Date:              now,
@@ -309,13 +307,12 @@ func NewUserCopy(now time.Time, pointer *string) *UserCopy {
 		UInt64Method:      uint64(10),
 		MethodWithContext: "1",
 		SuperMethod:       "hello",
-		PointerString:     pointer,
 	}
 }
 
-func NewUserCopyExtended(now time.Time, pointer *string) *UserCopyExtended {
+func NewUserCopyExtended(now time.Time) *UserCopyExtended {
 	return &UserCopyExtended{
-		UserCopy: *NewUserCopy(now, pointer),
+		UserCopy: *NewUserCopy(now),
 	}
 }
 
