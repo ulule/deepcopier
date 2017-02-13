@@ -498,7 +498,6 @@ func Copier(dst interface{}, src interface{}, args ...Options) error {
 				withContext = true
 			}
 
-			// Method() -> field -- TODO: handle WithContext
 			if InStringSlice(srcMethods, fieldName) {
 				method := reflect.ValueOf(src).MethodByName(fieldName)
 
