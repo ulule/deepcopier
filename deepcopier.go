@@ -441,54 +441,54 @@ func InStringSlice(haystack []string, needle string) bool {
 }
 
 // Copier is the brand new way to process copy.
-func Copier(from interface{}, to interface{}, args ...Options) error {
+func Copier(dst interface{}, src interface{}, args ...Options) error {
 	var (
-		options     = Options{}
-		fromValue   = reflect.Indirect(reflect.ValueOf(from))
-		fromType    = fromValue.Type()
-		fromMethods = getMethods(fromType)
-		toValue     = reflect.Indirect(reflect.ValueOf(to))
+		options    = Options{}
+		srcValue   = reflect.Indirect(reflect.ValueOf(src))
+		srcType    = srcValue.Type()
+		srcMethods = getMethods(srcType)
+		dstValue   = reflect.Indirect(reflect.ValueOf(dst))
 	)
 
 	// Pointer only for receiver
-	if !toValue.CanAddr() {
-		return errors.New("to value is unaddressable")
+	if !dstValue.CanAddr() {
+		return errors.New("dst value is unaddressable")
 	}
 
 	if len(args) > 0 {
 		options = args[0]
 	}
 
-	for i := 0; i < fromValue.NumField(); i++ {
+	for i := 0; i < srcValue.NumField(); i++ {
 		var (
-			fromFieldValue = fromValue.Field(i)
-			fromFieldType  = fromValue.Type().Field(i)
-			fromFieldName  = fromFieldType.Name
+			srcFieldValue = srcValue.Field(i)
+			srcFieldType  = srcValue.Type().Field(i)
+			srcFieldName  = srcFieldType.Name
 		)
 
-		if !fromFieldValue.IsValid() {
+		if !srcFieldValue.IsValid() {
 			continue
 		}
 
-		for ii := 0; ii < toValue.NumField(); ii++ {
+		for ii := 0; ii < dstValue.NumField(); ii++ {
 			var (
-				toFieldValue = toValue.Field(ii)
-				toFieldType  = toValue.Type().Field(ii)
-				toFieldName  = toFieldType.Name
-				toFieldTag   = toFieldType.Tag.Get(TagName)
+				dstFieldValue = dstValue.Field(ii)
+				dstFieldType  = dstValue.Type().Field(ii)
+				dstFieldName  = dstFieldType.Name
+				dstFieldTag   = dstFieldType.Tag.Get(TagName)
 				// Options
-				fieldName   = toFieldName
+				fieldName   = dstFieldName
 				withContext = false
 			)
 
-			tagOptions := GetTagOptions(toFieldTag)
+			tagOptions := GetTagOptions(dstFieldTag)
 
 			// If skip option is set, bypass copy.
 			if v, ok := tagOptions[SkipOptionName]; ok && v != "" {
 				continue
 			}
 
-			// Get real source field / method name from struct tag.
+			// Get real source field / method name src struct tag.
 			if v, ok := tagOptions[FieldOptionName]; ok && v != "" {
 				fieldName = v
 			}
@@ -499,8 +499,8 @@ func Copier(from interface{}, to interface{}, args ...Options) error {
 			}
 
 			// Method() -> field -- TODO: handle WithContext
-			if InStringSlice(fromMethods, fieldName) {
-				method := reflect.ValueOf(from).MethodByName(fieldName)
+			if InStringSlice(srcMethods, fieldName) {
+				method := reflect.ValueOf(src).MethodByName(fieldName)
 
 				if !method.IsValid() {
 					return fmt.Errorf("method %v in source is not valid", fieldName)
@@ -514,23 +514,23 @@ func Copier(from interface{}, to interface{}, args ...Options) error {
 					results = method.Call([]reflect.Value{})
 				}
 
-				toFieldValue.Set(results[0])
+				dstFieldValue.Set(results[0])
 
 				continue
 			}
 
-			if fieldName != fromFieldName {
+			if fieldName != srcFieldName {
 				continue
 			}
 
 			// Ptr -> Value
-			if fromFieldType.Type.Kind() == reflect.Ptr && !fromFieldValue.IsNil() && toFieldType.Type.Kind() != reflect.Ptr {
-				toFieldValue.Set(reflect.Indirect(fromFieldValue))
+			if srcFieldType.Type.Kind() == reflect.Ptr && !srcFieldValue.IsNil() && dstFieldType.Type.Kind() != reflect.Ptr {
+				dstFieldValue.Set(reflect.Indirect(srcFieldValue))
 				continue
 			}
 
-			if fromFieldType.Type.AssignableTo(toFieldType.Type) {
-				toFieldValue.Set(fromFieldValue)
+			if srcFieldType.Type.AssignableTo(dstFieldType.Type) {
+				dstFieldValue.Set(srcFieldValue)
 			}
 		}
 	}

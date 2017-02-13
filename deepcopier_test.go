@@ -419,7 +419,7 @@ func TestCopier(t *testing.T) {
 		Context: methodContext,
 	}
 
-	assert.Nil(t, Copier(t1, t2, options))
+	assert.Nil(t, Copier(t2, t1, options))
 
 	table := []struct {
 		in  interface{}
