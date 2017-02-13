@@ -30,12 +30,15 @@ func GetTagOptions(value string) map[string]string {
 	return options
 }
 
-// GetTypeMethods returns type methods.
-func GetTypeMethods(t reflect.Type) []string {
+// GetMethods returns type methods.
+func GetMethods(instance interface{}) []string {
+	t := reflect.TypeOf(instance)
+
 	var methods []string
 	for i := 0; i < t.NumMethod(); i++ {
 		methods = append(methods, t.Method(i).Name)
 	}
+
 	return methods
 }
 
@@ -46,5 +49,6 @@ func InStringSlice(haystack []string, needle string) bool {
 			return true
 		}
 	}
+
 	return false
 }
