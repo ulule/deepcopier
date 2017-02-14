@@ -25,8 +25,8 @@ func TestCopyTo_Struct(t *testing.T) {
 		in  interface{}
 		out interface{}
 	}{
-		1:  {expected.Title, entityCopy.Title},
-		2:  {expected.Date, entityCopy.Date},
+		1:  {expected.String, entityCopy.String},
+		2:  {expected.Time, entityCopy.Time},
 		4:  {expected.Float64, entityCopy.Float64},
 		5:  {expected.Int, entityCopy.Int},
 		9:  {expected.Int64, entityCopy.Int64},
@@ -61,8 +61,8 @@ func TestCopyTo_AnonymousStruct(t *testing.T) {
 		in  interface{}
 		out interface{}
 	}{
-		1:  {expected.Title, entityCopy.Title},
-		2:  {expected.Date, entityCopy.Date},
+		1:  {expected.String, entityCopy.String},
+		2:  {expected.Time, entityCopy.Time},
 		4:  {expected.Float64, entityCopy.Float64},
 		5:  {expected.Int, entityCopy.Int},
 		9:  {expected.Int64, entityCopy.Int64},
@@ -97,8 +97,8 @@ func TestCopyFrom_Struct(t *testing.T) {
 		in  interface{}
 		out interface{}
 	}{
-		1:  {expected.Name, entity.Name},
-		2:  {expected.Date, entity.Date},
+		1:  {expected.String, entity.String},
+		2:  {expected.Time, entity.Time},
 		3:  {expected.AFloat32, entity.AFloat32},
 		4:  {expected.AFloat64, entity.AFloat64},
 		5:  {expected.AnInt, entity.AnInt},
@@ -132,8 +132,8 @@ func TestCopyFrom_AnonymousStruct(t *testing.T) {
 		in  interface{}
 		out interface{}
 	}{
-		1:  {expected.Name, entity.Name},
-		2:  {expected.Date, entity.Date},
+		1:  {expected.String, entity.String},
+		2:  {expected.Time, entity.Time},
 		3:  {expected.AFloat32, entity.AFloat32},
 		4:  {expected.AFloat64, entity.AFloat64},
 		5:  {expected.AnInt, entity.AnInt},
@@ -250,8 +250,8 @@ type RelatedEntity struct {
 }
 
 type Entity struct {
-	Name         string
-	Date         time.Time
+	String       string
+	Time         time.Time
 	AFloat32     float32
 	AFloat64     float64
 	AnInt        int
@@ -267,13 +267,12 @@ type Entity struct {
 	AStringSlice []string
 	AnIntSlice   []int
 	ANullString  null.String
-	APointer     string
 }
 
 func NewEntity(data *EntityData) *Entity {
 	return &Entity{
-		Name:         data.String,
-		Date:         data.Time,
+		String:       data.String,
+		Time:         data.Time,
 		AnInt:        data.Int,
 		AnInt64:      data.Int64,
 		AnUInt:       data.Uint,
@@ -290,17 +289,17 @@ func (e *Entity) Int64Method() int64                                { return e.A
 func (e *Entity) UIntMethod() uint                                  { return e.AnUInt }
 func (e *Entity) UInt64Method() uint64                              { return e.AnUInt64 }
 func (e *Entity) Float64Method() float64                            { return e.AFloat64 }
-func (e *Entity) MethodWithDifferentName() string                   { return e.Name }
+func (e *Entity) MethodWithDifferentName() string                   { return e.String }
 func (e *Entity) MethodWithContext(c map[string]interface{}) string { return c["version"].(string) }
 
 type EntityCopy struct {
-	Date              time.Time   `json:"date"`
-	Title             string      `json:"name" deepcopier:"field:Name"`
-	Float64           float64     `json:"a_float64" deepcopier:"field:AFloat64"`
+	String            string      `json:"string"`
+	Time              time.Time   `json:"time"`
 	Int               int         `json:"an_int" deepcopier:"field:AnInt"`
 	Int64             int64       `json:"an_int64" deepcopier:"field:AnInt64"`
 	UInt              uint        `json:"an_uint" deepcopier:"field:AnUInt"`
 	UInt64            uint64      `json:"an_uint64" deepcopier:"field:AnUInt64"`
+	Float64           float64     `json:"a_float64" deepcopier:"field:AFloat64"`
 	NullString        null.String `json:"a_null_string" deepcopier:"field:ANullString"`
 	StringSlice       []string    `json:"a_string_slice" deepcopier:"field:AStringSlice"`
 	IntSlice          []int       `json:"an_int_slice" deepcopier:"field:AnIntSlice"`
@@ -314,8 +313,8 @@ type EntityCopy struct {
 
 func NewEntityCopy(data *EntityData) *EntityCopy {
 	return &EntityCopy{
-		Title:             data.String,
-		Date:              data.Time,
+		String:            data.String,
+		Time:              data.Time,
 		Float64:           data.Float64,
 		Int:               data.Int,
 		Int64:             data.Int64,
