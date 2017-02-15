@@ -25,8 +25,8 @@ func TestCopyTo_Struct(t *testing.T) {
 	assert.Nil(t, Copy(entity).WithContext(data.MethodContext).To(entityCopy))
 
 	table := getTable(t, expected, entityCopy, false)
-	for i, tt := range table {
-		assertEqual(t, i, tt.expected, tt.actual)
+	for _, tt := range table {
+		assertEqual(t, tt.expected, tt.actual)
 	}
 }
 
@@ -41,8 +41,8 @@ func TestCopyTo_AnonymousStruct(t *testing.T) {
 	assert.Nil(t, Copy(entity).WithContext(data.MethodContext).To(entityCopy))
 
 	table := getTable(t, expected, entityCopy, false)
-	for i, tt := range table {
-		assertEqual(t, i, tt.expected, tt.actual)
+	for _, tt := range table {
+		assertEqual(t, tt.expected, tt.actual)
 	}
 }
 
@@ -57,8 +57,8 @@ func TestCopyFrom_Struct(t *testing.T) {
 	assert.Nil(t, Copy(entity).From(entityCopy))
 
 	table := getTable(t, expected, entity, true)
-	for i, tt := range table {
-		assertEqual(t, i, tt.expected, tt.actual)
+	for _, tt := range table {
+		assertEqual(t, tt.expected, tt.actual)
 	}
 }
 
@@ -73,8 +73,8 @@ func TestCopyFrom_AnonymousStruct(t *testing.T) {
 	assert.Nil(t, Copy(entity).From(entityCopy))
 
 	table := getTable(t, expected, entity, true)
-	for i, tt := range table {
-		assertEqual(t, i, tt.expected, tt.actual)
+	for _, tt := range table {
+		assertEqual(t, tt.expected, tt.actual)
 	}
 }
 
@@ -360,6 +360,6 @@ func getTable(t *testing.T, expected interface{}, actual interface{}, reversed b
 }
 
 // assertEqual is a verbose version of assert.Equal()
-func assertEqual(t *testing.T, idx int, in interface{}, out interface{}) {
-	assert.Equal(t, in, out, fmt.Sprintf("%d -- %v not equal to %v", idx, in, out))
+func assertEqual(t *testing.T, in interface{}, out interface{}) {
+	assert.Equal(t, in, out, fmt.Sprintf("%v not equal to %v", in, out))
 }
