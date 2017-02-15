@@ -94,6 +94,22 @@ func TestCopyTo_UnexportedField(t *testing.T) {
 	assert.Equal(t, "", v2.value) // Should not be copied (because bypassed)
 }
 
+func TestCopyTo_Options_Skip(t *testing.T) {
+	var (
+		st = "hello"
+		v2 struct {
+			Value string `deepcopier:"skip"`
+		}
+	)
+
+	v1 := struct {
+		Value string
+	}{Value: st}
+
+	assert.Nil(t, Copy(v1).To(&v2))
+	assert.Equal(t, "", v2.Value) // Should not be copied (because bypassed)
+}
+
 // -----------------------------------------------------------------------------
 // Copy().From()
 // -----------------------------------------------------------------------------
@@ -172,6 +188,20 @@ func TestCopyFrom_UnexportedField(t *testing.T) {
 
 	assert.Nil(t, Copy(&v2).From(v1))
 	assert.Equal(t, "", v2.value) // Should not be copied (because bypassed)
+}
+
+func TestCopyFrom_Options_Skip(t *testing.T) {
+	var (
+		st = "hello"
+		v2 struct{ Value string }
+	)
+
+	v1 := struct {
+		Value string `deepcopier:"skip"`
+	}{Value: st}
+
+	assert.Nil(t, Copy(&v2).From(v1))
+	assert.Equal(t, "", v2.Value) // Should not be copied (because bypassed)
 }
 
 // -----------------------------------------------------------------------------
