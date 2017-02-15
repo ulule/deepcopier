@@ -140,11 +140,11 @@ func cp(dst interface{}, src interface{}, args ...Options) error {
 			dstFieldValue               = dstValue.FieldByName(dstFieldName)
 		)
 
-		// // Ptr -> Value
-		// if srcFieldType.Type.Kind() == reflect.Ptr && !srcFieldValue.IsNil() && dstFieldType.Type.Kind() != reflect.Ptr {
-		// 	dstFieldValue.Set(reflect.Indirect(srcFieldValue))
-		// 	continue
-		// }
+		// Ptr -> Value
+		if srcFieldType.Type.Kind() == reflect.Ptr && !srcFieldValue.IsNil() && dstFieldType.Type.Kind() != reflect.Ptr {
+			dstFieldValue.Set(reflect.Indirect(srcFieldValue))
+			continue
+		}
 
 		if srcFieldFound && dstFieldFound && srcFieldType.Type.AssignableTo(dstFieldType.Type) {
 			dstFieldValue.Set(srcFieldValue)

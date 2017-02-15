@@ -14,6 +14,10 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// -----------------------------------------------------------------------------
+// Copy().To()
+// -----------------------------------------------------------------------------
+
 func TestCopyTo_Struct(t *testing.T) {
 	var (
 		data       = NewEntityData()
@@ -46,6 +50,43 @@ func TestCopyTo_AnonymousStruct(t *testing.T) {
 	}
 }
 
+func TestCopyTo_PtrToValue_String(t *testing.T) {
+	var (
+		st = "hello"
+		v1 = struct{ Value *string }{Value: &st}
+		v2 struct{ Value string }
+	)
+
+	assert.Nil(t, Copy(v1).To(&v2))
+	assert.Equal(t, st, v2.Value)
+}
+
+func TestCopyTo_PtrToValue_Slice(t *testing.T) {
+	var (
+		slc = []string{"hello"}
+		v1  = struct{ Value *[]string }{Value: &slc}
+		v2  struct{ Value []string }
+	)
+
+	assert.Nil(t, Copy(v1).To(&v2))
+	assert.Equal(t, slc, v2.Value)
+}
+
+func TestCopyTo_PtrToValue_Map(t *testing.T) {
+	var (
+		m  = map[string]interface{}{"error": false}
+		v1 = struct{ Value *map[string]interface{} }{Value: &m}
+		v2 struct{ Value map[string]interface{} }
+	)
+
+	assert.Nil(t, Copy(v1).To(&v2))
+	assert.Equal(t, m, v2.Value)
+}
+
+// -----------------------------------------------------------------------------
+// Copy().From()
+// -----------------------------------------------------------------------------
+
 func TestCopyFrom_Struct(t *testing.T) {
 	var (
 		data       = NewEntityData()
@@ -76,6 +117,39 @@ func TestCopyFrom_AnonymousStruct(t *testing.T) {
 	for _, tt := range table {
 		assertEqual(t, tt.expected, tt.actual)
 	}
+}
+
+func TestCopyFrom_PtrToValue_String(t *testing.T) {
+	var (
+		st = "hello"
+		v1 = struct{ Value *string }{Value: &st}
+		v2 struct{ Value string }
+	)
+
+	assert.Nil(t, Copy(&v2).From(v1))
+	assert.Equal(t, st, v2.Value)
+}
+
+func TestCopyFrom_PtrToValue_Slice(t *testing.T) {
+	var (
+		slc = []string{"hello"}
+		v1  = struct{ Value *[]string }{Value: &slc}
+		v2  struct{ Value []string }
+	)
+
+	assert.Nil(t, Copy(&v2).From(v1))
+	assert.Equal(t, slc, v2.Value)
+}
+
+func TestCopyFrom_PtrToValue_Map(t *testing.T) {
+	var (
+		m  = map[string]interface{}{"error": false}
+		v1 = struct{ Value *map[string]interface{} }{Value: &m}
+		v2 struct{ Value map[string]interface{} }
+	)
+
+	assert.Nil(t, Copy(&v2).From(v1))
+	assert.Equal(t, m, v2.Value)
 }
 
 // -----------------------------------------------------------------------------
@@ -342,6 +416,8 @@ func getTable(t *testing.T, expected interface{}, actual interface{}, reversed b
 
 		if reversed {
 			field = v
+
+			// If reversed, entity doesn't have method fields.
 			if strings.Contains(field, "Method") {
 				continue
 			}
