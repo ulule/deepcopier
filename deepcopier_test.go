@@ -83,6 +83,17 @@ func TestCopyTo_PtrToValue_Map(t *testing.T) {
 	assert.Equal(t, m, v2.Value)
 }
 
+func TestCopyTo_UnexportedField(t *testing.T) {
+	var (
+		st = "hello"
+		v1 = struct{ value string }{value: st}
+		v2 struct{ value string }
+	)
+
+	assert.Nil(t, Copy(v1).To(&v2))
+	assert.Equal(t, "", v2.value) // Should not be copied (because bypassed)
+}
+
 // -----------------------------------------------------------------------------
 // Copy().From()
 // -----------------------------------------------------------------------------
@@ -150,6 +161,17 @@ func TestCopyFrom_PtrToValue_Map(t *testing.T) {
 
 	assert.Nil(t, Copy(&v2).From(v1))
 	assert.Equal(t, m, v2.Value)
+}
+
+func TestCopyFrom_UnexportedField(t *testing.T) {
+	var (
+		st = "hello"
+		v1 = struct{ value string }{value: st}
+		v2 struct{ value string }
+	)
+
+	assert.Nil(t, Copy(&v2).From(v1))
+	assert.Equal(t, "", v2.value) // Should not be copied (because bypassed)
 }
 
 // -----------------------------------------------------------------------------

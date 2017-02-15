@@ -238,6 +238,10 @@ func getFieldNames(instance interface{}) []string {
 			tField = v.Type().Field(i)
 		)
 
+		if !isExportableField(tField) {
+			continue
+		}
+
 		if tField.Type.Kind() == reflect.Struct && tField.Anonymous {
 			fields = append(fields, getFieldNames(vField.Interface())...)
 			continue
@@ -247,4 +251,9 @@ func getFieldNames(instance interface{}) []string {
 	}
 
 	return fields
+}
+
+// isExportableField returns true if the given struct field is exportable.
+func isExportableField(f reflect.StructField) bool {
+	return f.PkgPath == ""
 }
