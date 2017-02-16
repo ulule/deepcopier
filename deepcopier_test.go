@@ -130,6 +130,31 @@ func TestCopyTo_Options_SkipMethod(t *testing.T) {
 	assert.Empty(t, entityCopy.MethodSkipped)
 }
 
+func TestCopyTo_PtrToValue_AssignableTo(t *testing.T) {
+	type Rel struct {
+		ID int
+	}
+
+	type Src struct {
+		ID  int
+		Rel *Rel
+	}
+
+	type Dst struct {
+		ID  int
+		Rel string
+	}
+
+	var (
+		rel = &Rel{ID: 2}
+		src = &Src{ID: 1, Rel: rel}
+		dst = &Dst{}
+	)
+
+	assert.Nil(t, Copy(src).To(dst))
+	assert.Empty(t, dst.Rel)
+}
+
 // -----------------------------------------------------------------------------
 // Copy().From()
 // -----------------------------------------------------------------------------
@@ -243,6 +268,31 @@ func TestCopyFrom_Options_SkipMethod(t *testing.T) {
 
 	assert.Nil(t, Copy(entity).From(entityCopy))
 	assert.NotEqual(t, entity.EntityCopyMethod, entityCopy.EntityCopyMethod())
+}
+
+func TestCopyFrom_PtrToValue_AssignableTo(t *testing.T) {
+	type Rel struct {
+		ID int
+	}
+
+	type Src struct {
+		ID  int
+		Rel *Rel
+	}
+
+	type Dst struct {
+		ID  int
+		Rel string
+	}
+
+	var (
+		rel = &Rel{ID: 2}
+		src = &Src{ID: 1, Rel: rel}
+		dst = &Dst{}
+	)
+
+	assert.Nil(t, Copy(dst).From(src))
+	assert.Empty(t, dst.Rel)
 }
 
 // -----------------------------------------------------------------------------
