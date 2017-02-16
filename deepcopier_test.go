@@ -94,7 +94,17 @@ func TestCopyTo_UnexportedField(t *testing.T) {
 	assert.Equal(t, "", v2.value) // Should not be copied (because bypassed)
 }
 
-func TestCopyTo_Options_Skip(t *testing.T) {
+func TestCopyTo_UnknownField(t *testing.T) {
+	var (
+		st = "hello"
+		v1 = struct{ Value string }{Value: st}
+		v2 struct{ Foo string }
+	)
+
+	assert.Nil(t, Copy(v1).To(&v2))
+}
+
+func TestCopyTo_Options_SkipField(t *testing.T) {
 	var (
 		st = "hello"
 		v2 struct {
@@ -108,6 +118,16 @@ func TestCopyTo_Options_Skip(t *testing.T) {
 
 	assert.Nil(t, Copy(v1).To(&v2))
 	assert.Equal(t, "", v2.Value) // Should not be copied (because bypassed)
+}
+
+func TestCopyTo_Options_SkipMethod(t *testing.T) {
+	var (
+		data       = NewEntityData()
+		entity     = NewEntity(data)
+		entityCopy = &EntityCopy{}
+	)
+	assert.Nil(t, Copy(entity).WithContext(data.MethodContext).To(entityCopy))
+	assert.Empty(t, entityCopy.MethodSkipped)
 }
 
 // -----------------------------------------------------------------------------
@@ -190,7 +210,17 @@ func TestCopyFrom_UnexportedField(t *testing.T) {
 	assert.Equal(t, "", v2.value) // Should not be copied (because bypassed)
 }
 
-func TestCopyFrom_Options_Skip(t *testing.T) {
+func TestCopyFrom_UnknownField(t *testing.T) {
+	var (
+		st = "hello"
+		v1 = struct{ Value string }{Value: st}
+		v2 struct{ Foo string }
+	)
+
+	assert.Nil(t, Copy(&v2).From(v1))
+}
+
+func TestCopyFrom_Options_SkipField(t *testing.T) {
 	var (
 		st = "hello"
 		v2 struct{ Value string }
@@ -202,6 +232,17 @@ func TestCopyFrom_Options_Skip(t *testing.T) {
 
 	assert.Nil(t, Copy(&v2).From(v1))
 	assert.Equal(t, "", v2.Value) // Should not be copied (because bypassed)
+}
+
+func TestCopyFrom_Options_SkipMethod(t *testing.T) {
+	var (
+		data       = NewEntityData()
+		entity     = &Entity{}
+		entityCopy = NewEntityCopy(data)
+	)
+
+	assert.Nil(t, Copy(entity).From(entityCopy))
+	assert.NotEqual(t, entity.EntityCopyMethod, entityCopy.EntityCopyMethod())
 }
 
 // -----------------------------------------------------------------------------
@@ -229,6 +270,9 @@ type Entity struct {
 	IntSliceField       []int
 	IntSlicePtrField    *[]int
 	NullStringField     null.String
+
+	// Don't add me in fields mapping
+	EntityCopyMethod string `deepcopier:"skip"`
 }
 
 func NewEntity(data *EntityData) *Entity {
@@ -262,6 +306,7 @@ func (e *Entity) UInt64Method() uint64                              { return e.U
 func (e *Entity) Float64Method() float64                            { return e.Float64Field }
 func (e *Entity) MethodWithDifferentName() string                   { return e.String }
 func (e *Entity) MethodWithContext(c map[string]interface{}) string { return c["version"].(string) }
+func (e *Entity) MethodSkipped() int64                              { return 0 }
 
 type RelatedEntity struct {
 	String string
@@ -293,7 +338,12 @@ type EntityCopy struct {
 	UInt64Method      uint64
 	MethodWithContext string `deepcopier:"context"`
 	SuperMethod       string `deepcopier:"field:MethodWithDifferentName"`
+
+	// Don't add me in EntityFieldMapping
+	MethodSkipped string `deepcopier:"skip"`
 }
+
+func (ec EntityCopy) EntityCopyMethod() string { return "entity copy method" }
 
 func NewEntityCopy(data *EntityData) *EntityCopy {
 	return &EntityCopy{

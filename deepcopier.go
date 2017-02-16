@@ -85,6 +85,10 @@ func cp(dst interface{}, src interface{}, args ...Options) error {
 			continue
 		}
 
+		if _, ok := opts[SkipOptionName]; ok {
+			continue
+		}
+
 		method := reflect.ValueOf(src).MethodByName(m)
 		if !method.IsValid() {
 			return fmt.Errorf("method %s is invalid", m)
@@ -106,7 +110,8 @@ func cp(dst interface{}, src interface{}, args ...Options) error {
 		}
 
 		result := method.Call(args)[0]
-		if result.Type().AssignableTo(dstFieldType.Type) {
+
+		if result.Type().AssignableTo(dstFieldType.Type) && result.IsValid() {
 			dstFieldValue.Set(result)
 		}
 	}
@@ -119,6 +124,10 @@ func cp(dst interface{}, src interface{}, args ...Options) error {
 			dstFieldName                = srcFieldName
 			tagOptions                  TagOptions
 		)
+
+		if !srcFieldFound {
+			continue
+		}
 
 		if options.Reversed {
 			tagOptions = getTagOptions(srcFieldType.Tag.Get(TagName))
@@ -140,13 +149,17 @@ func cp(dst interface{}, src interface{}, args ...Options) error {
 			dstFieldValue               = dstValue.FieldByName(dstFieldName)
 		)
 
+		if !dstFieldFound {
+			continue
+		}
+
 		// Ptr -> Value
 		if srcFieldType.Type.Kind() == reflect.Ptr && !srcFieldValue.IsNil() && dstFieldType.Type.Kind() != reflect.Ptr {
 			dstFieldValue.Set(reflect.Indirect(srcFieldValue))
 			continue
 		}
 
-		if srcFieldFound && dstFieldFound && srcFieldType.Type.AssignableTo(dstFieldType.Type) {
+		if srcFieldFound && srcFieldType.Type.AssignableTo(dstFieldType.Type) {
 			dstFieldValue.Set(srcFieldValue)
 		}
 	}
