@@ -155,8 +155,10 @@ func cp(dst interface{}, src interface{}, args ...Options) error {
 
 		// Ptr -> Value
 		if srcFieldType.Type.Kind() == reflect.Ptr && !srcFieldValue.IsNil() && dstFieldType.Type.Kind() != reflect.Ptr {
-			if reflect.Indirect(srcFieldValue).Type().AssignableTo(dstFieldType.Type) {
-				dstFieldValue.Set(reflect.Indirect(srcFieldValue))
+			indirect := reflect.Indirect(srcFieldValue)
+
+			if indirect.Type().AssignableTo(dstFieldType.Type) {
+				dstFieldValue.Set(indirect)
 				continue
 			}
 		}
