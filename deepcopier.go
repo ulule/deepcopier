@@ -28,6 +28,9 @@ type (
 		// Reversed reverses struct tag checkings.
 		Reversed bool
 	}
+
+	// Processor is a copy processor.
+	Processor func(dst interface{}, src interface{}, options Options) error
 )
 
 // DeepCopier deep copies a struct to/from a struct.
@@ -51,24 +54,21 @@ func (dc *DeepCopier) WithContext(ctx map[string]interface{}) *DeepCopier {
 // To sets the destination.
 func (dc *DeepCopier) To(dst interface{}) error {
 	dc.dst = dst
-	return cp(dc.dst, dc.src, Options{Context: dc.ctx})
+	return process(dc.dst, dc.src, Options{Context: dc.ctx})
 }
 
 // From sets the given the source as destination and destination as source.
 func (dc *DeepCopier) From(src interface{}) error {
 	dc.dst = dc.src
 	dc.src = src
-	return cp(dc.dst, dc.src, Options{Context: dc.ctx, Reversed: true})
+	return process(dc.dst, dc.src, Options{Context: dc.ctx, Reversed: true})
 }
 
-// cp is the brand new way to process copy.
-func cp(dst interface{}, src interface{}, args ...Options) error {
+// process handles copy.
+func process(dst interface{}, src interface{}, args ...Options) error {
 	var (
-		options        = Options{}
-		srcValue       = reflect.Indirect(reflect.ValueOf(src))
-		dstValue       = reflect.Indirect(reflect.ValueOf(dst))
-		srcFieldNames  = getFieldNames(src)
-		srcMethodNames = getMethodNames(src)
+		options  = Options{}
+		dstValue = reflect.Indirect(reflect.ValueOf(dst))
 	)
 
 	if len(args) > 0 {
@@ -78,6 +78,26 @@ func cp(dst interface{}, src interface{}, args ...Options) error {
 	if !dstValue.CanAddr() {
 		return fmt.Errorf("destination %+v is unaddressable", dstValue.Interface())
 	}
+
+	processors := []Processor{
+		processMethods,
+		processFields,
+	}
+
+	for _, processor := range processors {
+		if err := processor(dst, src, options); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func processMethods(dst interface{}, src interface{}, options Options) error {
+	var (
+		dstValue       = reflect.Indirect(reflect.ValueOf(dst))
+		srcMethodNames = getMethodNames(src)
+	)
 
 	for _, m := range srcMethodNames {
 		name, opts := getRelatedField(dst, m)
@@ -115,6 +135,16 @@ func cp(dst interface{}, src interface{}, args ...Options) error {
 			dstFieldValue.Set(result)
 		}
 	}
+
+	return nil
+}
+
+func processFields(dst interface{}, src interface{}, options Options) error {
+	var (
+		srcValue      = reflect.Indirect(reflect.ValueOf(src))
+		dstValue      = reflect.Indirect(reflect.ValueOf(dst))
+		srcFieldNames = getFieldNames(src)
+	)
 
 	for _, f := range srcFieldNames {
 		var (
@@ -255,7 +285,8 @@ func getFieldNames(instance interface{}) []string {
 			tField = v.Type().Field(i)
 		)
 
-		if !isExportableField(tField) {
+		// Is exportable?
+		if tField.PkgPath != "" {
 			continue
 		}
 
@@ -268,9 +299,4 @@ func getFieldNames(instance interface{}) []string {
 	}
 
 	return fields
-}
-
-// isExportableField returns true if the given struct field is exportable.
-func isExportableField(f reflect.StructField) bool {
-	return f.PkgPath == ""
 }
