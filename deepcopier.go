@@ -28,9 +28,6 @@ type (
 		// Reversed reverses struct tag checkings.
 		Reversed bool
 	}
-
-	// Processor is a copy processor.
-	Processor func(dst interface{}, src interface{}, options Options) error
 )
 
 // DeepCopier deep copies a struct to/from a struct.
@@ -67,8 +64,11 @@ func (dc *DeepCopier) From(src interface{}) error {
 // process handles copy.
 func process(dst interface{}, src interface{}, args ...Options) error {
 	var (
-		options  = Options{}
-		dstValue = reflect.Indirect(reflect.ValueOf(dst))
+		options        = Options{}
+		srcValue       = reflect.Indirect(reflect.ValueOf(src))
+		dstValue       = reflect.Indirect(reflect.ValueOf(dst))
+		srcFieldNames  = getFieldNames(src)
+		srcMethodNames = getMethodNames(src)
 	)
 
 	if len(args) > 0 {
@@ -78,26 +78,6 @@ func process(dst interface{}, src interface{}, args ...Options) error {
 	if !dstValue.CanAddr() {
 		return fmt.Errorf("destination %+v is unaddressable", dstValue.Interface())
 	}
-
-	processors := []Processor{
-		processMethods,
-		processFields,
-	}
-
-	for _, processor := range processors {
-		if err := processor(dst, src, options); err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
-func processMethods(dst interface{}, src interface{}, options Options) error {
-	var (
-		dstValue       = reflect.Indirect(reflect.ValueOf(dst))
-		srcMethodNames = getMethodNames(src)
-	)
 
 	for _, m := range srcMethodNames {
 		name, opts := getRelatedField(dst, m)
@@ -135,16 +115,6 @@ func processMethods(dst interface{}, src interface{}, options Options) error {
 			dstFieldValue.Set(result)
 		}
 	}
-
-	return nil
-}
-
-func processFields(dst interface{}, src interface{}, options Options) error {
-	var (
-		srcValue      = reflect.Indirect(reflect.ValueOf(src))
-		dstValue      = reflect.Indirect(reflect.ValueOf(dst))
-		srcFieldNames = getFieldNames(src)
-	)
 
 	for _, f := range srcFieldNames {
 		var (
