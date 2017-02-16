@@ -183,6 +183,12 @@ func processFields(dst interface{}, src interface{}, options Options) error {
 			continue
 		}
 
+		// Empty interfaces
+		if dstFieldValue.Kind() == reflect.Interface {
+			dstFieldValue.Set(srcFieldValue)
+			continue
+		}
+
 		// Ptr -> Value
 		if srcFieldType.Type.Kind() == reflect.Ptr && !srcFieldValue.IsNil() && dstFieldType.Type.Kind() != reflect.Ptr {
 			indirect := reflect.Indirect(srcFieldValue)
@@ -193,7 +199,8 @@ func processFields(dst interface{}, src interface{}, options Options) error {
 			}
 		}
 
-		if srcFieldFound && srcFieldType.Type.AssignableTo(dstFieldType.Type) {
+		// Other types
+		if srcFieldType.Type.AssignableTo(dstFieldType.Type) {
 			dstFieldValue.Set(srcFieldValue)
 		}
 	}
