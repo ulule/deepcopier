@@ -15,6 +15,8 @@ const (
 	ContextOptionName = "context"
 	// SkipOptionName is the skip option name for struct tag.
 	SkipOptionName = "skip"
+	// ForceOptionName is the skip option name for struct tag.
+	ForceOptionName = "force"
 )
 
 type (
@@ -153,9 +155,11 @@ func process(dst interface{}, src interface{}, args ...Options) error {
 			continue
 		}
 
-		// Empty interfaces
 		if dstFieldValue.Kind() == reflect.Interface {
-			dstFieldValue.Set(srcFieldValue)
+			if _, ok := tagOptions[ForceOptionName]; ok {
+				dstFieldValue.Set(srcFieldValue)
+				continue
+			}
 			continue
 		}
 

@@ -155,29 +155,48 @@ func TestCopyTo_PtrToValue_AssignableTo(t *testing.T) {
 	assert.Empty(t, dst.Rel)
 }
 
-func TestCopyTo_EmptyInterface(t *testing.T) {
-	type Rel struct {
-		ID int
+func TestEmptyInterface(t *testing.T) {
+	type Rel struct{ ID int }
+	type Src struct{ Rel *Rel }
+	type Dst struct{ Rel interface{} }
+
+	type SrcForce struct {
+		Rel *Rel `deepcopier:"force"`
 	}
 
-	type Src struct {
-		ID  int
-		Rel *Rel
-	}
-
-	type Dst struct {
-		ID  int
-		Rel interface{}
+	type DstForce struct {
+		Rel interface{} `deepcopier:"force"`
 	}
 
 	var (
-		rel = &Rel{ID: 2}
-		src = &Src{ID: 1, Rel: rel}
-		dst = &Dst{}
+		rel      = &Rel{ID: 2}
+		src      = &Src{Rel: rel}
+		srcForce = &SrcForce{Rel: rel}
 	)
 
+	//
+	// Without force
+	//
+
+	dst := &Dst{}
 	assert.Nil(t, Copy(src).To(dst))
-	assert.Equal(t, src.Rel, dst.Rel)
+	assert.Nil(t, dst.Rel)
+
+	dst = &Dst{}
+	assert.Nil(t, Copy(dst).From(src))
+	assert.Nil(t, dst.Rel)
+
+	//
+	// With force
+	//
+
+	dstForce := &DstForce{}
+	assert.Nil(t, Copy(src).To(dstForce))
+	assert.Equal(t, src.Rel, dstForce.Rel)
+
+	dstForce = &DstForce{}
+	assert.Nil(t, Copy(dstForce).From(srcForce))
+	assert.Equal(t, srcForce.Rel, dstForce.Rel)
 }
 
 // -----------------------------------------------------------------------------
