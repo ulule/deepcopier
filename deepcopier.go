@@ -1,6 +1,7 @@
 package deepcopier
 
 import (
+	"database/sql/driver"
 	"fmt"
 	"reflect"
 	"strings"
@@ -155,10 +156,29 @@ func process(dst interface{}, src interface{}, args ...Options) error {
 			continue
 		}
 
+		// Force option for empty interfaces and nullable types
+		_, force := tagOptions[ForceOptionName]
+
+		// driver.Valuer types (sql.Null*)
+		if isNullableType(srcFieldType.Type) {
+			if force {
+				v, _ := srcFieldValue.Interface().(driver.Valuer).Value()
+				if v == nil {
+					continue
+				}
+
+				rv := reflect.ValueOf(v)
+				if rv.Type().AssignableTo(dstFieldType.Type) {
+					dstFieldValue.Set(rv)
+				}
+			}
+
+			continue
+		}
+
 		if dstFieldValue.Kind() == reflect.Interface {
-			if _, ok := tagOptions[ForceOptionName]; ok {
+			if force {
 				dstFieldValue.Set(srcFieldValue)
-				continue
 			}
 			continue
 		}
@@ -280,4 +300,9 @@ func getFieldNames(instance interface{}) []string {
 	}
 
 	return fields
+}
+
+// isNullableType returns true if the given type is a nullable one.
+func isNullableType(t reflect.Type) bool {
+	return t.ConvertibleTo(reflect.TypeOf((*driver.Valuer)(nil)).Elem())
 }
