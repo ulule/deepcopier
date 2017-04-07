@@ -1,390 +1,308 @@
 package deepcopier
 
 import (
+	"database/sql/driver"
 	"fmt"
 	"reflect"
 	"strings"
-	"time"
-
-	"github.com/guregu/null"
-	"github.com/lib/pq"
-	"github.com/oleiade/reflections"
 )
 
 const (
-	// TagName is struct field tag name.
+	// TagName is the deepcopier struct tag name.
 	TagName = "deepcopier"
-
 	// FieldOptionName is the from field option name for struct tag.
 	FieldOptionName = "field"
-
 	// ContextOptionName is the context option name for struct tag.
 	ContextOptionName = "context"
-
 	// SkipOptionName is the skip option name for struct tag.
 	SkipOptionName = "skip"
+	// ForceOptionName is the skip option name for struct tag.
+	ForceOptionName = "force"
+)
+
+type (
+	// TagOptions is a map that contains extracted struct tag options.
+	TagOptions map[string]string
+
+	// Options are copier options.
+	Options struct {
+		// Context given to WithContext() method.
+		Context map[string]interface{}
+		// Reversed reverses struct tag checkings.
+		Reversed bool
+	}
 )
 
 // DeepCopier deep copies a struct to/from a struct.
 type DeepCopier struct {
-	Source      interface{}
-	Destination interface{}
-	Tagged      interface{}
-	Context     map[string]interface{}
-	Reversed    bool
+	dst interface{}
+	src interface{}
+	ctx map[string]interface{}
 }
 
-// FieldOptions contains options passed to SetField method.
-type FieldOptions struct {
-	SourceField      string
-	DestinationField string
-	WithContext      bool
-	Skip             bool
+// Copy sets source or destination.
+func Copy(src interface{}) *DeepCopier {
+	return &DeepCopier{src: src}
 }
-
-// Copy sets the source.
-func Copy(source interface{}) *DeepCopier {
-	return &DeepCopier{
-		Source:   source,
-		Reversed: false,
-	}
-}
-
-// To sets the given tagged struct as destination struct.
-// Source -> Destination
-func (dc *DeepCopier) To(tagged interface{}) error {
-	dc.Destination = tagged
-	dc.Tagged = tagged
-	return dc.ProcessCopy()
-}
-
-// From sets the given tagged struct as source and the current source as destination.
-// Source <- Destination
-func (dc *DeepCopier) From(tagged interface{}) error {
-	dc.Destination = dc.Source
-	dc.Source = tagged
-	dc.Tagged = tagged
-	dc.Reversed = true
-	return dc.ProcessCopy()
-}
-
-// ProcessCopy processes copy.
-func (dc *DeepCopier) ProcessCopy() error {
-	fields := []string{}
-
-	val := reflect.ValueOf(dc.Tagged).Elem()
-
-	for i := 0; i < val.NumField(); i++ {
-		typ := val.Type().Field(i)
-
-		// Embedded struct
-		if typ.Anonymous {
-			f, _ := reflections.Fields(val.Field(i).Interface())
-			fields = append(fields, f...)
-		} else {
-			fields = append(fields, typ.Name)
-		}
-	}
-
-	for _, field := range fields {
-		fieldOptions := &FieldOptions{
-			SourceField:      field,
-			DestinationField: field,
-			WithContext:      false,
-			Skip:             false,
-		}
-
-		tagOptions, _ := reflections.GetFieldTag(dc.Tagged, field, TagName)
-
-		if tagOptions != "" {
-			opts := dc.GetTagOptions(tagOptions)
-			if _, ok := opts[FieldOptionName]; ok {
-				fieldName := opts[FieldOptionName]
-				if !dc.Reversed {
-					fieldOptions.SourceField = fieldName
-				} else {
-					fieldOptions.DestinationField = fieldName
-				}
-			}
-			if _, ok := opts[ContextOptionName]; ok {
-				fieldOptions.WithContext = true
-			}
-			if _, ok := opts[SkipOptionName]; ok {
-				fieldOptions.Skip = true
-			}
-		}
-
-		if err := dc.SetField(fieldOptions); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-// -----------------------------------------------------------------------------
-// Options
-// -----------------------------------------------------------------------------
 
 // WithContext injects the given context into the builder instance.
-func (dc *DeepCopier) WithContext(context map[string]interface{}) *DeepCopier {
-	dc.Context = context
+func (dc *DeepCopier) WithContext(ctx map[string]interface{}) *DeepCopier {
+	dc.ctx = ctx
 	return dc
 }
 
-// -----------------------------------------------------------------------------
-// Struct tags
-// -----------------------------------------------------------------------------
+// To sets the destination.
+func (dc *DeepCopier) To(dst interface{}) error {
+	dc.dst = dst
+	return process(dc.dst, dc.src, Options{Context: dc.ctx})
+}
 
-// GetTagOptions parses deepcopier tag field and returns options.
-func (dc *DeepCopier) GetTagOptions(value string) map[string]string {
-	options := map[string]string{}
-	for _, opt := range strings.Split(value, ";") {
-		o := strings.Split(opt, ":")
-		// deepcopier:"keyword; without; value;"
-		if len(o) == 1 {
-			k := o[0]
-			options[k] = ""
+// From sets the given the source as destination and destination as source.
+func (dc *DeepCopier) From(src interface{}) error {
+	dc.dst = dc.src
+	dc.src = src
+	return process(dc.dst, dc.src, Options{Context: dc.ctx, Reversed: true})
+}
+
+// process handles copy.
+func process(dst interface{}, src interface{}, args ...Options) error {
+	var (
+		options        = Options{}
+		srcValue       = reflect.Indirect(reflect.ValueOf(src))
+		dstValue       = reflect.Indirect(reflect.ValueOf(dst))
+		srcFieldNames  = getFieldNames(src)
+		srcMethodNames = getMethodNames(src)
+	)
+
+	if len(args) > 0 {
+		options = args[0]
+	}
+
+	if !dstValue.CanAddr() {
+		return fmt.Errorf("destination %+v is unaddressable", dstValue.Interface())
+	}
+
+	for _, m := range srcMethodNames {
+		name, opts := getRelatedField(dst, m)
+		if name == "" {
+			continue
 		}
-		// deepcopier:"key:value; anotherkey:anothervalue"
-		if len(o) == 2 {
-			k, v := o[0], o[1]
-			k = strings.TrimSpace(k)
-			v = strings.TrimSpace(v)
-			options[k] = v
+
+		if _, ok := opts[SkipOptionName]; ok {
+			continue
+		}
+
+		method := reflect.ValueOf(src).MethodByName(m)
+		if !method.IsValid() {
+			return fmt.Errorf("method %s is invalid", m)
+		}
+
+		var (
+			dstFieldType, _ = dstValue.Type().FieldByName(name)
+			dstFieldValue   = dstValue.FieldByName(name)
+		)
+
+		withContext := false
+		if _, ok := opts[ContextOptionName]; ok {
+			withContext = true
+		}
+
+		args := []reflect.Value{}
+		if withContext {
+			args = []reflect.Value{reflect.ValueOf(options.Context)}
+		}
+
+		result := method.Call(args)[0]
+
+		if result.Type().AssignableTo(dstFieldType.Type) && result.IsValid() {
+			dstFieldValue.Set(result)
 		}
 	}
+
+	for _, f := range srcFieldNames {
+		var (
+			srcFieldValue               = srcValue.FieldByName(f)
+			srcFieldType, srcFieldFound = srcValue.Type().FieldByName(f)
+			srcFieldName                = srcFieldType.Name
+			dstFieldName                = srcFieldName
+			tagOptions                  TagOptions
+		)
+
+		if !srcFieldFound {
+			continue
+		}
+
+		if options.Reversed {
+			tagOptions = getTagOptions(srcFieldType.Tag.Get(TagName))
+			if v, ok := tagOptions[FieldOptionName]; ok && v != "" {
+				dstFieldName = v
+			}
+		} else {
+			if name, opts := getRelatedField(dst, srcFieldName); name != "" {
+				dstFieldName, tagOptions = name, opts
+			}
+		}
+
+		if _, ok := tagOptions[SkipOptionName]; ok {
+			continue
+		}
+
+		var (
+			dstFieldType, dstFieldFound = dstValue.Type().FieldByName(dstFieldName)
+			dstFieldValue               = dstValue.FieldByName(dstFieldName)
+		)
+
+		if !dstFieldFound {
+			continue
+		}
+
+		// Force option for empty interfaces and nullable types
+		_, force := tagOptions[ForceOptionName]
+
+		// driver.Valuer types (sql.Null*)
+		if isNullableType(srcFieldType.Type) {
+			if force {
+				v, _ := srcFieldValue.Interface().(driver.Valuer).Value()
+				if v == nil {
+					continue
+				}
+
+				rv := reflect.ValueOf(v)
+				if rv.Type().AssignableTo(dstFieldType.Type) {
+					dstFieldValue.Set(rv)
+				}
+			}
+
+			continue
+		}
+
+		if dstFieldValue.Kind() == reflect.Interface {
+			if force {
+				dstFieldValue.Set(srcFieldValue)
+			}
+			continue
+		}
+
+		// Ptr -> Value
+		if srcFieldType.Type.Kind() == reflect.Ptr && !srcFieldValue.IsNil() && dstFieldType.Type.Kind() != reflect.Ptr {
+			indirect := reflect.Indirect(srcFieldValue)
+
+			if indirect.Type().AssignableTo(dstFieldType.Type) {
+				dstFieldValue.Set(indirect)
+				continue
+			}
+		}
+
+		// Other types
+		if srcFieldType.Type.AssignableTo(dstFieldType.Type) {
+			dstFieldValue.Set(srcFieldValue)
+		}
+	}
+
+	return nil
+}
+
+// getTagOptions parses deepcopier tag field and returns options.
+func getTagOptions(value string) TagOptions {
+	options := TagOptions{}
+
+	for _, opt := range strings.Split(value, ";") {
+		o := strings.Split(opt, ":")
+
+		// deepcopier:"keyword; without; value;"
+		if len(o) == 1 {
+			options[o[0]] = ""
+		}
+
+		// deepcopier:"key:value; anotherkey:anothervalue"
+		if len(o) == 2 {
+			options[strings.TrimSpace(o[0])] = strings.TrimSpace(o[1])
+		}
+	}
+
 	return options
 }
 
-// -----------------------------------------------------------------------------
-// Field Setters
-// -----------------------------------------------------------------------------
+// getRelatedField returns first matching field.
+func getRelatedField(instance interface{}, name string) (string, TagOptions) {
+	var (
+		value      = reflect.Indirect(reflect.ValueOf(instance))
+		fieldName  string
+		tagOptions TagOptions
+	)
 
-// SetField sets the value of the given field.
-func (dc *DeepCopier) SetField(options *FieldOptions) error {
-	if options.Skip {
-		return nil
-	}
+	for i := 0; i < value.NumField(); i++ {
+		var (
+			vField     = value.Field(i)
+			tField     = value.Type().Field(i)
+			tagOptions = getTagOptions(tField.Tag.Get(TagName))
+		)
 
-	if dc.Reversed {
-		has, _ := reflections.HasField(dc.Destination, options.DestinationField)
-		if !has {
-			return nil
-		}
-	}
-
-	has, _ := reflections.HasField(dc.Source, options.SourceField)
-	if !has {
-		err := dc.HandleMethod(options)
-		if err != nil {
-			has, _ = reflections.HasField(dc.Destination, options.DestinationField)
-			if has {
-				return nil
+		if tField.Type.Kind() == reflect.Struct && tField.Anonymous {
+			if n, o := getRelatedField(vField.Interface(), name); n != "" {
+				return n, o
 			}
 		}
-		return nil
-	}
 
-	kind, _ := reflections.GetFieldKind(dc.Source, options.SourceField)
-	if kind == reflect.Struct {
-		if err := dc.HandleStructField(options); err != nil {
-			return err
+		if v, ok := tagOptions[FieldOptionName]; ok && v == name {
+			return tField.Name, tagOptions
 		}
-		return nil
+
+		if tField.Name == name {
+			return tField.Name, tagOptions
+		}
 	}
 
-	if err := dc.HandleField(options); err != nil {
-		return err
-	}
-
-	return nil
+	return fieldName, tagOptions
 }
 
-// SetFieldValue Sets the given value to the given field.
-func (dc *DeepCopier) SetFieldValue(entity interface{}, name string, value reflect.Value) error {
-	kind := value.Kind()
+// getMethodNames returns instance's method names.
+func getMethodNames(instance interface{}) []string {
+	var methods []string
 
-	if kind == reflect.Ptr {
-		if value.IsNil() {
-			return nil
-		}
-		value = value.Elem()
-		kind = value.Kind()
+	t := reflect.TypeOf(instance)
+	for i := 0; i < t.NumMethod(); i++ {
+		methods = append(methods, t.Method(i).Name)
 	}
 
-	// Maps
-	if kind == reflect.Map {
-		switch v := value.Interface().(type) {
-		case map[string]interface{}, map[string]string, map[string]map[string]string, map[string]map[string]map[string]string:
-			if err := reflections.SetField(entity, name, v); err != nil {
-				return err
-			}
-			return nil
-		}
-	}
-
-	// Structs
-	if kind == reflect.Struct {
-		switch v := value.Interface().(type) {
-		case time.Time, pq.NullTime, null.String:
-			if err := reflections.SetField(entity, name, v); err != nil {
-				return err
-			}
-			return nil
-		}
-	}
-
-	// Slices
-	if kind == reflect.Slice {
-		switch v := value.Interface().(type) {
-		case []int8, []int16, []int32, []int64, []int, []uint8, []uint16, []uint32, []uint64, []uint, []float32, []float64, []string, []bool:
-			if err := reflections.SetField(entity, name, v); err != nil {
-				return err
-			}
-			return nil
-		}
-	}
-
-	// Reflect
-	switch kind {
-	case reflect.Int8:
-		if err := reflections.SetField(entity, name, int8(value.Int())); err != nil {
-			return err
-		}
-		return nil
-	case reflect.Int16:
-		if err := reflections.SetField(entity, name, int16(value.Int())); err != nil {
-			return err
-		}
-		return nil
-	case reflect.Int32:
-		if err := reflections.SetField(entity, name, int32(value.Int())); err != nil {
-			return err
-		}
-		return nil
-	case reflect.Int64:
-		if err := reflections.SetField(entity, name, value.Int()); err != nil {
-			return err
-		}
-		return nil
-	case reflect.Int:
-		if err := reflections.SetField(entity, name, int(value.Int())); err != nil {
-			return err
-		}
-		return nil
-	case reflect.Uint8:
-		if err := reflections.SetField(entity, name, uint8(value.Uint())); err != nil {
-			return err
-		}
-		return nil
-	case reflect.Uint16:
-		if err := reflections.SetField(entity, name, uint16(value.Uint())); err != nil {
-			return err
-		}
-		return nil
-	case reflect.Uint32:
-		if err := reflections.SetField(entity, name, uint32(value.Uint())); err != nil {
-			return err
-		}
-		return nil
-	case reflect.Uint64:
-		if err := reflections.SetField(entity, name, value.Uint()); err != nil {
-			return err
-		}
-		return nil
-	case reflect.Uint:
-		if err := reflections.SetField(entity, name, uint(value.Uint())); err != nil {
-			return err
-		}
-		return nil
-	case reflect.Float32:
-		if err := reflections.SetField(entity, name, float32(value.Float())); err != nil {
-			return err
-		}
-		return nil
-	case reflect.Float64:
-		if err := reflections.SetField(entity, name, value.Float()); err != nil {
-			return err
-		}
-		return nil
-	case reflect.String:
-		if err := reflections.SetField(entity, name, value.String()); err != nil {
-			return err
-		}
-		return nil
-	case reflect.Bool:
-		if err := reflections.SetField(entity, name, value.Bool()); err != nil {
-			return err
-		}
-		return nil
-	}
-
-	return nil
+	return methods
 }
 
-// -----------------------------------------------------------------------------
-// Field Type Handlers
-// -----------------------------------------------------------------------------
+// getFieldNames returns instance's field names.
+func getFieldNames(instance interface{}) []string {
+	var (
+		fields []string
+		v      = reflect.Indirect(reflect.ValueOf(instance))
+		t      = v.Type()
+	)
 
-// HandleStructField sets the value for the given supported struct field.
-func (dc *DeepCopier) HandleStructField(options *FieldOptions) error {
-	f, err := reflections.GetField(dc.Source, options.SourceField)
-	if err != nil {
-		return err
-	}
-
-	switch v := f.(type) {
-	case pq.NullTime:
-		if v.Valid {
-			if err := reflections.SetField(dc.Destination, options.DestinationField, &v.Time); err != nil {
-				return err
-			}
-		}
-	case time.Time:
-		if err := reflections.SetField(dc.Destination, options.DestinationField, v); err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
-// HandleField sets value for the given field.
-func (dc *DeepCopier) HandleField(options *FieldOptions) error {
-	v, err := reflections.GetField(dc.Source, options.SourceField)
-	if err != nil {
-		return err
-	}
-
-	value := reflect.ValueOf(v)
-	if err := dc.SetFieldValue(dc.Destination, options.DestinationField, value); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-// HandleMethod tries to call method on model and sets result in resource field.
-func (dc *DeepCopier) HandleMethod(options *FieldOptions) error {
-	if dc.Reversed {
+	if t.Kind() != reflect.Struct {
 		return nil
 	}
 
-	method := reflect.ValueOf(dc.Source).MethodByName(options.SourceField)
-	if !method.IsValid() {
-		return fmt.Errorf("Method %s does not exist", options.SourceField)
+	for i := 0; i < v.NumField(); i++ {
+		var (
+			vField = v.Field(i)
+			tField = v.Type().Field(i)
+		)
+
+		// Is exportable?
+		if tField.PkgPath != "" {
+			continue
+		}
+
+		if tField.Type.Kind() == reflect.Struct && tField.Anonymous {
+			fields = append(fields, getFieldNames(vField.Interface())...)
+			continue
+		}
+
+		fields = append(fields, tField.Name)
 	}
 
-	var results []reflect.Value
-	if options.WithContext {
-		results = method.Call([]reflect.Value{reflect.ValueOf(dc.Context)})
-	} else {
-		results = method.Call([]reflect.Value{})
-	}
+	return fields
+}
 
-	if err := dc.SetFieldValue(dc.Destination, options.DestinationField, results[0]); err != nil {
-		return err
-	}
-
-	return nil
+// isNullableType returns true if the given type is a nullable one.
+func isNullableType(t reflect.Type) bool {
+	return t.ConvertibleTo(reflect.TypeOf((*driver.Valuer)(nil)).Elem())
 }
