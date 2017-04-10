@@ -159,7 +159,26 @@ func process(dst interface{}, src interface{}, args ...Options) error {
 		// Force option for empty interfaces and nullable types
 		_, force := tagOptions[ForceOptionName]
 
-		// driver.Valuer types (sql.Null*)
+		// Valuer -> ptr
+		if isNullableType(srcFieldType.Type) && dstFieldValue.Kind() == reflect.Ptr && force {
+			v, _ := srcFieldValue.Interface().(driver.Valuer).Value()
+			if v == nil {
+				continue
+			}
+
+			valueType := reflect.TypeOf(v)
+
+			ptr := reflect.New(valueType)
+			ptr.Elem().Set(reflect.ValueOf(v))
+
+			if valueType.AssignableTo(dstFieldType.Type.Elem()) {
+				dstFieldValue.Set(ptr)
+			}
+
+			continue
+		}
+
+		// Valuer -> value
 		if isNullableType(srcFieldType.Type) {
 			if force {
 				v, _ := srcFieldValue.Interface().(driver.Valuer).Value()
