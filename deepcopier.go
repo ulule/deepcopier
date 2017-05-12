@@ -82,43 +82,6 @@ func process(dst interface{}, src interface{}, args ...Options) error {
 		return fmt.Errorf("destination %+v is unaddressable", dstValue.Interface())
 	}
 
-	for _, m := range srcMethodNames {
-		name, opts := getRelatedField(dst, m)
-		if name == "" {
-			continue
-		}
-
-		if _, ok := opts[SkipOptionName]; ok {
-			continue
-		}
-
-		method := reflect.ValueOf(src).MethodByName(m)
-		if !method.IsValid() {
-			return fmt.Errorf("method %s is invalid", m)
-		}
-
-		var (
-			dstFieldType, _ = dstValue.Type().FieldByName(name)
-			dstFieldValue   = dstValue.FieldByName(name)
-		)
-
-		withContext := false
-		if _, ok := opts[ContextOptionName]; ok {
-			withContext = true
-		}
-
-		args := []reflect.Value{}
-		if withContext {
-			args = []reflect.Value{reflect.ValueOf(options.Context)}
-		}
-
-		result := method.Call(args)[0]
-
-		if result.Type().AssignableTo(dstFieldType.Type) && result.IsValid() {
-			dstFieldValue.Set(result)
-		}
-	}
-
 	for _, f := range srcFieldNames {
 		var (
 			srcFieldValue               = srcValue.FieldByName(f)
@@ -215,6 +178,43 @@ func process(dst interface{}, src interface{}, args ...Options) error {
 		// Other types
 		if srcFieldType.Type.AssignableTo(dstFieldType.Type) {
 			dstFieldValue.Set(srcFieldValue)
+		}
+	}
+
+	for _, m := range srcMethodNames {
+		name, opts := getRelatedField(dst, m)
+		if name == "" {
+			continue
+		}
+
+		if _, ok := opts[SkipOptionName]; ok {
+			continue
+		}
+
+		method := reflect.ValueOf(src).MethodByName(m)
+		if !method.IsValid() {
+			return fmt.Errorf("method %s is invalid", m)
+		}
+
+		var (
+			dstFieldType, _ = dstValue.Type().FieldByName(name)
+			dstFieldValue   = dstValue.FieldByName(name)
+		)
+
+		withContext := false
+		if _, ok := opts[ContextOptionName]; ok {
+			withContext = true
+		}
+
+		args := []reflect.Value{}
+		if withContext {
+			args = []reflect.Value{reflect.ValueOf(options.Context)}
+		}
+
+		result := method.Call(args)[0]
+
+		if result.Type().AssignableTo(dstFieldType.Type) && result.IsValid() {
+			dstFieldValue.Set(result)
 		}
 	}
 

@@ -620,7 +620,7 @@ func TestField_SameNameWithDifferentType(t *testing.T) {
 func TestMethod(t *testing.T) {
 	var (
 		c   = map[string]interface{}{"message": "hello"}
-		src = &MethodTesterFoo{}
+		src = &MethodTesterFoo{TagFirst: "field-value"}
 		dst = &MethodTesterBar{}
 	)
 
@@ -632,6 +632,7 @@ func TestMethod(t *testing.T) {
 	assert.Equal(t, c, dst.FooContext)
 	assert.Equal(t, MethodTesterFoo{}.FooInteger(), dst.FooInteger)
 	assert.Empty(t, dst.FooSkipped)
+	assert.Equal(t, "method-value", dst.TagFirst)
 
 	//
 	// From()
@@ -642,6 +643,7 @@ func TestMethod(t *testing.T) {
 	assert.Equal(t, c, dst.FooContext)
 	assert.Equal(t, MethodTesterFoo{}.FooInteger(), dst.FooInteger)
 	assert.Empty(t, dst.FooSkipped)
+	assert.Equal(t, "method-value", dst.TagFirst)
 }
 
 func TestAnonymousStruct(t *testing.T) {
@@ -700,6 +702,7 @@ type MethodTesterFoo struct {
 	BarInteger int
 	BarContext map[string]interface{} `deepcopier:"context"`
 	BarSkipped string                 `deepcopier:"skip"`
+	TagFirst   string                 `deepcopier:"field:GetTagFirst"`
 }
 
 func (MethodTesterFoo) FooInteger() int {
@@ -714,10 +717,15 @@ func (MethodTesterFoo) FooSkipped() string {
 	return "skipped"
 }
 
+func (MethodTesterFoo) GetTagFirst() string {
+	return "method-value"
+}
+
 type MethodTesterBar struct {
 	FooInteger int
 	FooContext map[string]interface{} `deepcopier:"context"`
 	FooSkipped string                 `deepcopier:"skip"`
+	TagFirst   string                 `deepcopier:"field:GetTagFirst"`
 }
 
 func (MethodTesterBar) BarInteger() int {
@@ -730,4 +738,8 @@ func (MethodTesterBar) BarContext(c map[string]interface{}) map[string]interface
 
 func (MethodTesterBar) BarSkipped() string {
 	return "skipped"
+}
+
+func (MethodTesterBar) GetTagFirst() string {
+	return "method-value"
 }
