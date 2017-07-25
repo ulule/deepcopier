@@ -199,21 +199,44 @@ func process(dst interface{}, src interface{}, args ...Options) error {
 		var (
 			dstFieldType, _ = dstValue.Type().FieldByName(name)
 			dstFieldValue   = dstValue.FieldByName(name)
+			_, withContext  = opts[ContextOptionName]
+			_, force        = opts[ForceOptionName]
 		)
-
-		withContext := false
-		if _, ok := opts[ContextOptionName]; ok {
-			withContext = true
-		}
 
 		args := []reflect.Value{}
 		if withContext {
 			args = []reflect.Value{reflect.ValueOf(options.Context)}
 		}
 
-		result := method.Call(args)[0]
+		var (
+			result          = method.Call(args)[0]
+			resultInterface = result.Interface()
+			resultValue     = reflect.ValueOf(resultInterface)
+			resultType      = resultValue.Type()
+		)
 
-		if result.Type().AssignableTo(dstFieldType.Type) && result.IsValid() {
+		// Value -> Ptr
+		if dstFieldValue.Kind() == reflect.Ptr && force {
+			ptr := reflect.New(resultType)
+			ptr.Elem().Set(resultValue)
+
+			if ptr.Type().AssignableTo(dstFieldType.Type) {
+				dstFieldValue.Set(ptr)
+			}
+
+			continue
+		}
+
+		// Ptr -> value
+		if resultValue.Kind() == reflect.Ptr && force {
+			if resultValue.Elem().Type().AssignableTo(dstFieldType.Type) {
+				dstFieldValue.Set(resultValue.Elem())
+			}
+
+			continue
+		}
+
+		if resultType.AssignableTo(dstFieldType.Type) && result.IsValid() {
 			dstFieldValue.Set(result)
 		}
 	}

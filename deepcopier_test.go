@@ -633,6 +633,8 @@ func TestMethod(t *testing.T) {
 	assert.Equal(t, MethodTesterFoo{}.FooInteger(), dst.FooInteger)
 	assert.Empty(t, dst.FooSkipped)
 	assert.Equal(t, "method-value", dst.TagFirst)
+	assert.Equal(t, MethodTesterFoo{}.FooSliceToSlicePtr(), *dst.FooSliceToSlicePtr)
+	assert.Equal(t, *MethodTesterFoo{}.FooSlicePtrToSlice(), dst.FooSlicePtrToSlice)
 
 	//
 	// From()
@@ -644,6 +646,8 @@ func TestMethod(t *testing.T) {
 	assert.Equal(t, MethodTesterFoo{}.FooInteger(), dst.FooInteger)
 	assert.Empty(t, dst.FooSkipped)
 	assert.Equal(t, "method-value", dst.TagFirst)
+	assert.Equal(t, MethodTesterFoo{}.FooSliceToSlicePtr(), *dst.FooSliceToSlicePtr)
+	assert.Equal(t, *MethodTesterFoo{}.FooSlicePtrToSlice(), dst.FooSlicePtrToSlice)
 }
 
 func TestAnonymousStruct(t *testing.T) {
@@ -721,11 +725,21 @@ func (MethodTesterFoo) GetTagFirst() string {
 	return "method-value"
 }
 
+func (MethodTesterFoo) FooSliceToSlicePtr() []string {
+	return []string{"hello"}
+}
+
+func (MethodTesterFoo) FooSlicePtrToSlice() *[]string {
+	return &[]string{"hello"}
+}
+
 type MethodTesterBar struct {
-	FooInteger int
-	FooContext map[string]interface{} `deepcopier:"context"`
-	FooSkipped string                 `deepcopier:"skip"`
-	TagFirst   string                 `deepcopier:"field:GetTagFirst"`
+	FooInteger         int
+	FooContext         map[string]interface{} `deepcopier:"context"`
+	FooSkipped         string                 `deepcopier:"skip"`
+	TagFirst           string                 `deepcopier:"field:GetTagFirst"`
+	FooSliceToSlicePtr *[]string              `deepcopier:"force"`
+	FooSlicePtrToSlice []string               `deepcopier:"force"`
 }
 
 func (MethodTesterBar) BarInteger() int {
