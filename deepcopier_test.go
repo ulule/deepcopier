@@ -634,6 +634,15 @@ func TestMethod(t *testing.T) {
 	assert.Empty(t, dst.FooSkipped)
 	assert.Equal(t, "method-value", dst.TagFirst)
 
+	assert.Equal(t, MethodTesterFoo{}.FooSliceToSlicePtr(), *dst.FooSliceToSlicePtr)
+	assert.Equal(t, *MethodTesterFoo{}.FooSlicePtrToSlice(), dst.FooSlicePtrToSlice)
+
+	assert.Equal(t, MethodTesterFoo{}.FooStringToStringPtr(), *dst.FooStringToStringPtr)
+	assert.Equal(t, *MethodTesterFoo{}.FooStringPtrToString(), dst.FooStringPtrToString)
+
+	assert.Equal(t, MethodTesterFoo{}.FooMapToMapPtr(), *dst.FooMapToMapPtr)
+	assert.Equal(t, *MethodTesterFoo{}.FooMapPtrToMap(), dst.FooMapPtrToMap)
+
 	//
 	// From()
 	//
@@ -644,6 +653,15 @@ func TestMethod(t *testing.T) {
 	assert.Equal(t, MethodTesterFoo{}.FooInteger(), dst.FooInteger)
 	assert.Empty(t, dst.FooSkipped)
 	assert.Equal(t, "method-value", dst.TagFirst)
+
+	assert.Equal(t, MethodTesterFoo{}.FooSliceToSlicePtr(), *dst.FooSliceToSlicePtr)
+	assert.Equal(t, *MethodTesterFoo{}.FooSlicePtrToSlice(), dst.FooSlicePtrToSlice)
+
+	assert.Equal(t, MethodTesterFoo{}.FooStringToStringPtr(), *dst.FooStringToStringPtr)
+	assert.Equal(t, *MethodTesterFoo{}.FooStringPtrToString(), dst.FooStringPtrToString)
+
+	assert.Equal(t, MethodTesterFoo{}.FooMapToMapPtr(), *dst.FooMapToMapPtr)
+	assert.Equal(t, *MethodTesterFoo{}.FooMapPtrToMap(), dst.FooMapPtrToMap)
 }
 
 func TestAnonymousStruct(t *testing.T) {
@@ -721,11 +739,42 @@ func (MethodTesterFoo) GetTagFirst() string {
 	return "method-value"
 }
 
+func (MethodTesterFoo) FooSliceToSlicePtr() []string {
+	return []string{"hello"}
+}
+
+func (MethodTesterFoo) FooSlicePtrToSlice() *[]string {
+	return &[]string{"hello"}
+}
+
+func (MethodTesterFoo) FooStringToStringPtr() string {
+	return "hello"
+}
+
+func (MethodTesterFoo) FooStringPtrToString() *string {
+	s := "hello"
+	return &s
+}
+
+func (MethodTesterFoo) FooMapToMapPtr() map[string]interface{} {
+	return map[string]interface{}{"one": 1}
+}
+
+func (MethodTesterFoo) FooMapPtrToMap() *map[string]interface{} {
+	return &map[string]interface{}{"one": 1}
+}
+
 type MethodTesterBar struct {
-	FooInteger int
-	FooContext map[string]interface{} `deepcopier:"context"`
-	FooSkipped string                 `deepcopier:"skip"`
-	TagFirst   string                 `deepcopier:"field:GetTagFirst"`
+	FooInteger           int
+	FooContext           map[string]interface{}  `deepcopier:"context"`
+	FooSkipped           string                  `deepcopier:"skip"`
+	TagFirst             string                  `deepcopier:"field:GetTagFirst"`
+	FooSliceToSlicePtr   *[]string               `deepcopier:"force"`
+	FooSlicePtrToSlice   []string                `deepcopier:"force"`
+	FooStringToStringPtr *string                 `deepcopier:"force"`
+	FooStringPtrToString string                  `deepcopier:"force"`
+	FooMapToMapPtr       *map[string]interface{} `deepcopier:"force"`
+	FooMapPtrToMap       map[string]interface{}  `deepcopier:"force"`
 }
 
 func (MethodTesterBar) BarInteger() int {
