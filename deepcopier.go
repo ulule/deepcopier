@@ -358,6 +358,5 @@ func getFieldNames(instance interface{}) []string {
 
 // isNullableType returns true if the given type is a nullable one.
 func isNullableType(t reflect.Type) bool {
-	b := t.ConvertibleTo(reflect.TypeOf((*driver.Valuer)(nil)).Elem())
-	return b
+	return t.ConvertibleTo(reflect.TypeOf((*driver.Valuer)(nil)).Elem())
 }
