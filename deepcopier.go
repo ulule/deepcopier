@@ -124,6 +124,12 @@ func process(dst interface{}, src interface{}, args ...Options) error {
 
 		// Valuer -> ptr
 		if isNullableType(srcFieldType.Type) && dstFieldValue.Kind() == reflect.Ptr && force {
+			// We have same nullable type on both sides
+			if srcFieldValue.Type().AssignableTo(dstFieldType.Type) {
+				dstFieldValue.Set(srcFieldValue)
+				continue
+			}
+
 			v, _ := srcFieldValue.Interface().(driver.Valuer).Value()
 			if v == nil {
 				continue
@@ -143,6 +149,12 @@ func process(dst interface{}, src interface{}, args ...Options) error {
 
 		// Valuer -> value
 		if isNullableType(srcFieldType.Type) {
+			// We have same nullable type on both sides
+			if srcFieldValue.Type().AssignableTo(dstFieldType.Type) {
+				dstFieldValue.Set(srcFieldValue)
+				continue
+			}
+
 			if force {
 				v, _ := srcFieldValue.Interface().(driver.Valuer).Value()
 				if v == nil {
@@ -346,5 +358,6 @@ func getFieldNames(instance interface{}) []string {
 
 // isNullableType returns true if the given type is a nullable one.
 func isNullableType(t reflect.Type) bool {
-	return t.ConvertibleTo(reflect.TypeOf((*driver.Valuer)(nil)).Elem())
+	b := t.ConvertibleTo(reflect.TypeOf((*driver.Valuer)(nil)).Elem())
+	return b
 }
