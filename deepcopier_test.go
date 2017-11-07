@@ -7,6 +7,7 @@ import (
 
 	"github.com/guregu/null"
 	"github.com/lib/pq"
+	uuid "github.com/satori/go.uuid"
 	assert "github.com/stretchr/testify/require"
 )
 
@@ -710,6 +711,116 @@ func TestAnonymousStruct(t *testing.T) {
 	dst = &Dst{}
 	assert.Nil(t, Copy(dst).From(srcRenamedField))
 	assert.Equal(t, srcRenamedField.MyInt, dst.Int)
+}
+
+func TestNullableType(t *testing.T) {
+	type Value struct {
+		UUID uuid.UUID
+	}
+
+	type Ptr struct {
+		UUID *uuid.UUID
+	}
+
+	type ToString struct {
+		UUID uuid.UUID `deepcopier:"force"`
+	}
+
+	type PtrToString struct {
+		UUID *uuid.UUID `deepcopier:"force"`
+	}
+
+	type FromNullable struct {
+		UUID string `deepcopier:"force"`
+	}
+
+	type PtrFromNullable struct {
+		UUID *string `deepcopier:"force"`
+	}
+
+	// Same type: value -- copy to
+	{
+		src := &Value{UUID: uuid.NewV4()}
+		dst := &Value{}
+		assert.Nil(t, Copy(src).To(dst))
+		assert.Equal(t, src.UUID, dst.UUID)
+	}
+
+	// Same type: value -- copy from
+	{
+		src := &Value{}
+		from := &Value{UUID: uuid.NewV4()}
+		assert.Nil(t, Copy(src).From(from))
+		assert.Equal(t, from.UUID, src.UUID)
+	}
+
+	// Same type: pointer -- copy to
+	{
+		uid := uuid.NewV4()
+		src := &Ptr{UUID: &uid}
+		dst := &Ptr{}
+		assert.Nil(t, Copy(src).To(dst))
+		assert.Equal(t, src.UUID, dst.UUID)
+	}
+
+	// Same type: pointer -- copy from
+	{
+		uid := uuid.NewV4()
+		src := &Ptr{}
+		from := &Ptr{UUID: &uid}
+		assert.Nil(t, Copy(src).From(from))
+		assert.Equal(t, from.UUID, src.UUID)
+	}
+
+	// Value to value -- copy to
+	{
+		src := &Value{UUID: uuid.NewV4()}
+		dst := &FromNullable{}
+		assert.Nil(t, Copy(src).To(dst))
+		assert.Equal(t, src.UUID.String(), dst.UUID)
+	}
+
+	// Value to value -- copy from
+	{
+		src := &FromNullable{}
+		from := &ToString{UUID: uuid.NewV4()}
+		assert.Nil(t, Copy(src).From(from))
+		assert.Equal(t, from.UUID.String(), src.UUID)
+	}
+
+	// Value to pointer -- copy to
+	{
+		src := &ToString{UUID: uuid.NewV4()}
+		dst := &PtrFromNullable{}
+		assert.Nil(t, Copy(src).To(dst))
+		assert.Equal(t, src.UUID.String(), *dst.UUID)
+	}
+
+	// Value to pointer -- copy from
+	{
+		src := &PtrFromNullable{}
+		from := &ToString{UUID: uuid.NewV4()}
+		assert.Nil(t, Copy(src).From(from))
+		assert.Equal(t, from.UUID.String(), *src.UUID)
+	}
+
+	// Pointer to value -- copy to
+	{
+		uid := uuid.NewV4()
+		src := &PtrToString{UUID: &uid}
+		dst := &FromNullable{}
+		assert.Nil(t, Copy(src).To(dst))
+		assert.Equal(t, src.UUID.String(), dst.UUID)
+	}
+
+	// Pointer to value -- copy from
+	{
+		uid := uuid.NewV4()
+		src := &FromNullable{}
+		from := &PtrToString{UUID: &uid}
+		assert.Nil(t, Copy(src).From(from))
+		assert.Equal(t, from.UUID.String(), src.UUID)
+	}
 }
 
 // ----------------------------------------------------------------------------
