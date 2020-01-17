@@ -1,6 +1,6 @@
 # Deepcopier
 
-[![Build Status](https://secure.travis-ci.org/ulule/deepcopier.png?branch=master)](http://travis-ci.org/ulule/deepcopier)
+[![Build Status](https://secure.travis-ci.org/ulule/deepcopier.svg?branch=master)](http://travis-ci.org/ulule/deepcopier)
 
 This package is meant to make copying of structs to/from others structs a bit easier.
 
