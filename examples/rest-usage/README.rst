@@ -35,7 +35,7 @@ API in READ only.
 We will use postgresql_ as database so I'm also assuming you
 already have postgresql_ installed on your laptop :)
 
-Let's create the databass!
+Let's create the database!
 
 ::
 

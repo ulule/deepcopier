@@ -22,7 +22,7 @@ type Account struct {
 }
 
 type Accounts struct {
-	Db gorm.DB
+	Db *gorm.DB
 }
 
 func (a *Accounts) Detail(w rest.ResponseWriter, r *rest.Request) {
