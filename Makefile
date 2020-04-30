@@ -1,5 +1,5 @@
 .PHONY: test
 test:
-	go test -race
-	go test -cover
-	go test -v
+	cd tests; go test -race
+	cd tests; go test -cover
+	cd tests; go test -v

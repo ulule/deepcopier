@@ -1,4 +1,4 @@
-package deepcopier
+package tests
 
 import (
 	"database/sql"
@@ -9,6 +9,7 @@ import (
 	"github.com/lib/pq"
 	uuid "github.com/satori/go.uuid"
 	assert "github.com/stretchr/testify/require"
+	"github.com/ulule/deepcopier"
 )
 
 func TestField(t *testing.T) {
@@ -90,7 +91,7 @@ func TestField(t *testing.T) {
 	//
 
 	dst := &Dst{}
-	assert.Nil(t, Copy(src).To(dst))
+	assert.Nil(t, deepcopier.Copy(src).To(dst))
 	assert.Equal(t, src.Int, dst.Int)
 	assert.Equal(t, src.IntPtr, dst.IntPtr)
 	assert.Equal(t, src.Slice, dst.Slice)
@@ -102,7 +103,7 @@ func TestField(t *testing.T) {
 	assert.Zero(t, dst.Skipped)
 
 	dstRenamed := &Renamed{}
-	assert.Nil(t, Copy(src).To(dstRenamed))
+	assert.Nil(t, deepcopier.Copy(src).To(dstRenamed))
 	assert.Equal(t, src.Int, dstRenamed.MyInt)
 	assert.Equal(t, src.IntPtr, dstRenamed.MyIntPtr)
 	assert.Equal(t, src.Slice, dstRenamed.MySlice)
@@ -118,7 +119,7 @@ func TestField(t *testing.T) {
 	//
 
 	dst = &Dst{}
-	assert.Nil(t, Copy(dst).From(src))
+	assert.Nil(t, deepcopier.Copy(dst).From(src))
 	assert.Equal(t, src.Int, dst.Int)
 	assert.Equal(t, src.IntPtr, dst.IntPtr)
 	assert.Equal(t, src.Slice, dst.Slice)
@@ -130,7 +131,7 @@ func TestField(t *testing.T) {
 	assert.Zero(t, dst.Skipped)
 
 	dst = &Dst{}
-	assert.Nil(t, Copy(dst).From(srcRenamed))
+	assert.Nil(t, deepcopier.Copy(dst).From(srcRenamed))
 	assert.Equal(t, srcRenamed.MyInt, dst.Int)
 	assert.Equal(t, srcRenamed.MyIntPtr, dst.IntPtr)
 	assert.Equal(t, srcRenamed.MySlice, dst.Slice)
@@ -203,14 +204,14 @@ func TestField_PointerToValue(t *testing.T) {
 	//
 
 	dst := &Dst{}
-	assert.Nil(t, Copy(src).To(dst))
+	assert.Nil(t, deepcopier.Copy(src).To(dst))
 	assert.Equal(t, *src.Int, dst.Int)
 	assert.Equal(t, *src.Slice, dst.Slice)
 	assert.Equal(t, *src.Map, dst.Map)
 	assert.Equal(t, *src.Struct, dst.Struct)
 
 	dstRenamed := &DstRenamed{}
-	assert.Nil(t, Copy(src).To(dstRenamed))
+	assert.Nil(t, deepcopier.Copy(src).To(dstRenamed))
 	assert.Equal(t, *src.Int, dstRenamed.MyInt)
 	assert.Equal(t, *src.Slice, dstRenamed.MySlice)
 	assert.Equal(t, *src.Map, dstRenamed.MyMap)
@@ -221,14 +222,14 @@ func TestField_PointerToValue(t *testing.T) {
 	//
 
 	dst = &Dst{}
-	assert.Nil(t, Copy(dst).From(src))
+	assert.Nil(t, deepcopier.Copy(dst).From(src))
 	assert.Equal(t, *src.Int, dst.Int)
 	assert.Equal(t, *src.Slice, dst.Slice)
 	assert.Equal(t, *src.Map, dst.Map)
 	assert.Equal(t, *src.Struct, dst.Struct)
 
 	dst = &Dst{}
-	assert.Nil(t, Copy(dst).From(srcRenamed))
+	assert.Nil(t, deepcopier.Copy(dst).From(srcRenamed))
 	assert.Equal(t, *srcRenamed.MyInt, dst.Int)
 	assert.Equal(t, *srcRenamed.MySlice, dst.Slice)
 	assert.Equal(t, *srcRenamed.MyMap, dst.Map)
@@ -255,7 +256,7 @@ func TestField_Unexported(t *testing.T) {
 	//
 
 	dst := &Dst{}
-	assert.Nil(t, Copy(src).To(dst))
+	assert.Nil(t, deepcopier.Copy(src).To(dst))
 	assert.Equal(t, "", dst.unexported)
 
 	//
@@ -263,7 +264,7 @@ func TestField_Unexported(t *testing.T) {
 	//
 
 	dst = &Dst{}
-	assert.Nil(t, Copy(dst).From(src))
+	assert.Nil(t, deepcopier.Copy(dst).From(src))
 	assert.Equal(t, "", dst.unexported)
 }
 
@@ -284,7 +285,7 @@ func TestField_Unknown(t *testing.T) {
 
 	src := &Original{Int: 1}
 	dstRenamed := &Renamed{}
-	assert.Nil(t, Copy(src).To(dstRenamed))
+	assert.Nil(t, deepcopier.Copy(src).To(dstRenamed))
 	assert.Equal(t, 0, dstRenamed.MyInt)
 
 	//
@@ -293,7 +294,7 @@ func TestField_Unknown(t *testing.T) {
 
 	srcRenamed := &Renamed{MyInt: 1}
 	dst := &Original{}
-	assert.Nil(t, Copy(dst).From(srcRenamed))
+	assert.Nil(t, deepcopier.Copy(dst).From(srcRenamed))
 	assert.Equal(t, 0, dst.Int)
 }
 
@@ -331,11 +332,11 @@ func TestField_EmptyInterface(t *testing.T) {
 	//
 
 	dst := &Dst{}
-	assert.Nil(t, Copy(src).To(dst))
+	assert.Nil(t, deepcopier.Copy(src).To(dst))
 	assert.Nil(t, dst.Rel)
 
 	dst = &Dst{}
-	assert.Nil(t, Copy(dst).From(src))
+	assert.Nil(t, deepcopier.Copy(dst).From(src))
 	assert.Nil(t, dst.Rel)
 
 	//
@@ -343,11 +344,11 @@ func TestField_EmptyInterface(t *testing.T) {
 	//
 
 	dstForce := &DstForce{}
-	assert.Nil(t, Copy(src).To(dstForce))
+	assert.Nil(t, deepcopier.Copy(src).To(dstForce))
 	assert.Equal(t, src.Rel, dstForce.Rel)
 
 	dstForce = &DstForce{}
-	assert.Nil(t, Copy(dstForce).From(srcForce))
+	assert.Nil(t, deepcopier.Copy(dstForce).From(srcForce))
 	assert.Equal(t, srcForce.Rel, dstForce.Rel)
 }
 
@@ -524,7 +525,7 @@ func TestField_NullTypes(t *testing.T) {
 
 	dst := &Dst{}
 
-	assert.Nil(t, Copy(src).To(dst))
+	assert.Nil(t, deepcopier.Copy(src).To(dst))
 	assert.Zero(t, dst.PQNullTimeValid)
 	assert.Nil(t, dst.PQNullTimeValidPtr)
 	assert.Zero(t, dst.PQNullTimeInvalid)
@@ -555,7 +556,7 @@ func TestField_NullTypes(t *testing.T) {
 	//
 
 	dstForce := &DstForce{}
-	assert.Nil(t, Copy(srcForce).To(dstForce))
+	assert.Nil(t, deepcopier.Copy(srcForce).To(dstForce))
 
 	assert.Equal(t, srcForce.PQNullTimeValid.Time, dstForce.PQNullTimeValid)
 	assert.NotNil(t, dstForce.PQNullTimeValidPtr)
@@ -606,7 +607,7 @@ func TestField_SameNameWithDifferentType(t *testing.T) {
 	srcInt := &FooInt{Foo: 1}
 	dstStr := &FooStr{}
 
-	assert.Nil(t, Copy(dstStr).From(srcInt))
+	assert.Nil(t, deepcopier.Copy(dstStr).From(srcInt))
 	assert.Empty(t, dstStr.Foo)
 
 	//
@@ -614,7 +615,7 @@ func TestField_SameNameWithDifferentType(t *testing.T) {
 	//
 
 	dstStr = &FooStr{}
-	assert.Nil(t, Copy(dstStr).From(srcInt))
+	assert.Nil(t, deepcopier.Copy(dstStr).From(srcInt))
 	assert.Empty(t, dstStr.Foo)
 }
 
@@ -629,7 +630,7 @@ func TestMethod(t *testing.T) {
 	// To()
 	//
 
-	assert.Nil(t, Copy(src).WithContext(c).To(dst))
+	assert.Nil(t, deepcopier.Copy(src).WithContext(c).To(dst))
 	assert.Equal(t, c, dst.FooContext)
 	assert.Equal(t, MethodTesterFoo{}.FooInteger(), dst.FooInteger)
 	assert.Empty(t, dst.FooSkipped)
@@ -649,7 +650,7 @@ func TestMethod(t *testing.T) {
 	//
 
 	dst = &MethodTesterBar{}
-	assert.Nil(t, Copy(dst).WithContext(c).From(src))
+	assert.Nil(t, deepcopier.Copy(dst).WithContext(c).From(src))
 	assert.Equal(t, c, dst.FooContext)
 	assert.Equal(t, MethodTesterFoo{}.FooInteger(), dst.FooInteger)
 	assert.Empty(t, dst.FooSkipped)
@@ -693,11 +694,11 @@ func TestAnonymousStruct(t *testing.T) {
 	//
 
 	dst := &Dst{}
-	assert.Nil(t, Copy(src).To(dst))
+	assert.Nil(t, deepcopier.Copy(src).To(dst))
 	assert.Equal(t, src.Int, dst.Int)
 
 	dstRenamedField := &DstRenamedField{}
-	assert.Nil(t, Copy(src).To(dstRenamedField))
+	assert.Nil(t, deepcopier.Copy(src).To(dstRenamedField))
 	assert.Equal(t, src.Int, dstRenamedField.MyInt)
 
 	//
@@ -705,11 +706,11 @@ func TestAnonymousStruct(t *testing.T) {
 	//
 
 	dst = &Dst{}
-	assert.Nil(t, Copy(dst).From(src))
+	assert.Nil(t, deepcopier.Copy(dst).From(src))
 	assert.Equal(t, src.Int, dst.Int)
 
 	dst = &Dst{}
-	assert.Nil(t, Copy(dst).From(srcRenamedField))
+	assert.Nil(t, deepcopier.Copy(dst).From(srcRenamedField))
 	assert.Equal(t, srcRenamedField.MyInt, dst.Int)
 }
 
@@ -742,7 +743,7 @@ func TestNullableType(t *testing.T) {
 	{
 		src := &Value{UUID: uuid.NewV4()}
 		dst := &Value{}
-		assert.Nil(t, Copy(src).To(dst))
+		assert.Nil(t, deepcopier.Copy(src).To(dst))
 		assert.Equal(t, src.UUID, dst.UUID)
 	}
 
@@ -750,7 +751,7 @@ func TestNullableType(t *testing.T) {
 	{
 		src := &Value{}
 		from := &Value{UUID: uuid.NewV4()}
-		assert.Nil(t, Copy(src).From(from))
+		assert.Nil(t, deepcopier.Copy(src).From(from))
 		assert.Equal(t, from.UUID, src.UUID)
 	}
 
@@ -759,7 +760,7 @@ func TestNullableType(t *testing.T) {
 		uid := uuid.NewV4()
 		src := &Ptr{UUID: &uid}
 		dst := &Ptr{}
-		assert.Nil(t, Copy(src).To(dst))
+		assert.Nil(t, deepcopier.Copy(src).To(dst))
 		assert.Equal(t, src.UUID, dst.UUID)
 	}
 
@@ -768,7 +769,7 @@ func TestNullableType(t *testing.T) {
 		uid := uuid.NewV4()
 		src := &Ptr{}
 		from := &Ptr{UUID: &uid}
-		assert.Nil(t, Copy(src).From(from))
+		assert.Nil(t, deepcopier.Copy(src).From(from))
 		assert.Equal(t, from.UUID, src.UUID)
 	}
 
@@ -776,7 +777,7 @@ func TestNullableType(t *testing.T) {
 	{
 		src := &Value{UUID: uuid.NewV4()}
 		dst := &FromNullable{}
-		assert.Nil(t, Copy(src).To(dst))
+		assert.Nil(t, deepcopier.Copy(src).To(dst))
 		assert.Equal(t, src.UUID.String(), dst.UUID)
 	}
 
@@ -784,7 +785,7 @@ func TestNullableType(t *testing.T) {
 	{
 		src := &FromNullable{}
 		from := &ToString{UUID: uuid.NewV4()}
-		assert.Nil(t, Copy(src).From(from))
+		assert.Nil(t, deepcopier.Copy(src).From(from))
 		assert.Equal(t, from.UUID.String(), src.UUID)
 	}
 
@@ -792,7 +793,7 @@ func TestNullableType(t *testing.T) {
 	{
 		src := &ToString{UUID: uuid.NewV4()}
 		dst := &PtrFromNullable{}
-		assert.Nil(t, Copy(src).To(dst))
+		assert.Nil(t, deepcopier.Copy(src).To(dst))
 		assert.Equal(t, src.UUID.String(), *dst.UUID)
 	}
 
@@ -800,7 +801,7 @@ func TestNullableType(t *testing.T) {
 	{
 		src := &PtrFromNullable{}
 		from := &ToString{UUID: uuid.NewV4()}
-		assert.Nil(t, Copy(src).From(from))
+		assert.Nil(t, deepcopier.Copy(src).From(from))
 		assert.Equal(t, from.UUID.String(), *src.UUID)
 	}
 
@@ -809,7 +810,7 @@ func TestNullableType(t *testing.T) {
 		uid := uuid.NewV4()
 		src := &PtrToString{UUID: &uid}
 		dst := &FromNullable{}
-		assert.Nil(t, Copy(src).To(dst))
+		assert.Nil(t, deepcopier.Copy(src).To(dst))
 		assert.Equal(t, src.UUID.String(), dst.UUID)
 	}
 
@@ -818,7 +819,7 @@ func TestNullableType(t *testing.T) {
 		uid := uuid.NewV4()
 		src := &FromNullable{}
 		from := &PtrToString{UUID: &uid}
-		assert.Nil(t, Copy(src).From(from))
+		assert.Nil(t, deepcopier.Copy(src).From(from))
 		assert.Equal(t, from.UUID.String(), src.UUID)
 	}
 }
